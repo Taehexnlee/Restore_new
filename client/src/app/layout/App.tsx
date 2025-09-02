@@ -1,5 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
-import type { Product } from "../models/product";
+import { useMemo, useState } from "react";
 import {
   Box,
   Container,
@@ -8,10 +7,9 @@ import {
   createTheme,
 } from "@mui/material";
 import Navbar from "./Navbar";
-import Catalog from "../../features/catalog/Catalogs";
+import { Outlet } from "react-router-dom";
 
 export default function App() {
-  const [products, setProducts] = useState<Product[]>([]);
 
   // 다크모드 상태 + 로컬스토리지 동기화
   const [darkMode, setDarkMode] = useState<boolean>(() => {
@@ -42,11 +40,7 @@ export default function App() {
   );
 
   // 상품 로드
-  useEffect(() => {
-    fetch("https://localhost:5001/api/products")
-      .then((res) => res.json())
-      .then((data: Product[]) => setProducts(data));
-  }, []);
+  
 
   // 배경 그라디언트(강의 스타일)
   const gradient = darkMode
@@ -68,7 +62,7 @@ export default function App() {
         }}
       >
         <Container maxWidth="xl">
-          <Catalog products={products} />
+          <Outlet />
         </Container>
       </Box>
     </ThemeProvider>

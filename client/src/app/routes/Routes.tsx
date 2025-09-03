@@ -6,6 +6,8 @@ import ProductDetails from "../../features/catalog/ProductDetails";
 import HomePage from "../../features/home/HomePage";
 import ContactPage from "../../features/contact/ContactPage"; // ✅ 이게 정답
 import App from "../layout/App";
+import ServerError from "../errors/ServerError";
+import NotFound from "../errors/NotFound";
 
 export const router = createBrowserRouter([
   {
@@ -17,6 +19,9 @@ export const router = createBrowserRouter([
       { path: "catalog/:id", element: <ProductDetails /> },
       { path: "about", element: <AboutPage /> },
       { path: "contact", element: <ContactPage /> }, // ✅
+      { path: 'server-error', element: <ServerError /> },
+      { path: 'not-found', element: <NotFound /> },     // ✅ 추가
+
     ],
   },
 ]);

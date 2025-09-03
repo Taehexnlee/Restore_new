@@ -1,17 +1,17 @@
-// src/features/catalog/Catalog.tsx
-import { useEffect, useState } from 'react';
-import type { Product } from '../../app/models/product';
+
 import ProductList from './ProductList';
+import { Container } from '@mui/material';
+import { useFetchProductsQuery } from './catalogApi';
 
 
 export default function Catalog() {
-  const [products, setProducts] = useState<Product[]>([]);
+  const { data, isLoading } = useFetchProductsQuery();
 
-  useEffect(() => {
-    fetch("https://localhost:5001/api/products")
-      .then((res) => res.json())
-      .then((data: Product[]) => setProducts(data));
-  }, []);
+  if (isLoading || !data) return <div>Loading...</div>;
 
-  return <ProductList products={products} />;
+  return (
+    <Container maxWidth="xl" sx={{ mt: 14 }}>
+      <ProductList products={data} />
+    </Container>
+  );
 }

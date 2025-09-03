@@ -1,58 +1,50 @@
-import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import type { Product } from "../../app/models/product";
-import { Button, Divider, Grid2, Table, TableBody, TableCell, TableContainer, TableRow, TextField, Typography } from "@mui/material";
+import { Button, Divider, Grid2, Table, TableBody, TableCell, TableContainer, TextField, Typography } from "@mui/material";
+import { useFetchProductDetailsQuery } from "./catalogApi";
 
 export default function ProductDetails() {
-
   const { id } = useParams();
-  const [product, setProduct] = useState<Product | null>(null);
- 
-  useEffect(() => {
-    fetch(`https://localhost:5001/api/products/${id}`)
-      .then(res => res.json())
-      .then(data => setProduct(data))
-      .catch(err => console.error(err));
-  }, [id]);
+  const productId = +(id ?? 0);
+  const { data: product, isLoading } = useFetchProductDetailsQuery(productId);
 
-  if (!product) return <div>Loading...</div>;
+  if (!product || isLoading) return <div>Loading...</div>;
 
   const productDetails = [
-    { label: "Name", value: product.name },
-    { label: "Description", value: product.description },
-    { label: "Type", value: product.type },
-    { label: "Brand", value: product.brand },
-    { label: "Quantity in Stock", value: product.quantityInStock },
+    { label: 'Name', value: product.name },
+    { label: 'Description', value: product.description },
+    { label: 'Type', value: product.type },
+    { label: 'Brand', value: product.brand },
+    { label: 'Quantity in stock', value: product.quantityInStock },
   ];
+
   return (
-    <Grid2 container spacing={6} sx={{ maxWidth: "lg", mx: "auto" }}>
-      {/* Left: Image */}
+    <Grid2 container spacing={6} sx={{ maxWidth: 'lg', mx: 'auto' }}>
       <Grid2 size={6}>
         <img
           src={product.pictureUrl}
           alt={product.name}
-          style={{ width: "100%" }}
+          style={{ width: '100%' }}
         />
       </Grid2>
 
-      {/* Right: Details */}
       <Grid2 size={6}>
         <Typography variant="h3">{product.name}</Typography>
         <Divider sx={{ mb: 2 }} />
+
         <Typography variant="h4" color="secondary">
           ${ (product.price / 100).toFixed(2) }
         </Typography>
 
-        <TableContainer sx={{ mt: 2 }}>
+        <TableContainer sx={{ '& td': { fontSize: '1rem' }, mt: 2 }}>
           <Table>
-          <TableBody>
-            {productDetails.map((detail, i) => (
-              <TableRow key={i}>
-                <TableCell sx={{ fontWeight: "bold" }}>{detail.label}</TableCell>
-                <TableCell>{detail.value}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
+            <TableBody>
+              {productDetails.map((d, idx) => (
+                <tr key={idx}>
+                  <TableCell sx={{ fontWeight: 'bold' }}>{d.label}</TableCell>
+                  <TableCell>{d.value}</TableCell>
+                </tr>
+              ))}
+            </TableBody>
           </Table>
         </TableContainer>
 
@@ -72,6 +64,7 @@ export default function ProductDetails() {
               size="large"
               variant="contained"
               fullWidth
+              sx={{ height: 55 }}
             >
               Add to basket
             </Button>

@@ -10,12 +10,13 @@ import {
   Box,
   LinearProgress,
 } from "@mui/material";
-import { NavLink } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import DarkModeIcon from "@mui/icons-material/DarkMode";
 import LightModeIcon from "@mui/icons-material/LightMode";
 import { useAppDispatch, useAppSelector } from "../store/store";
 import { toggleDarkMode } from "./uiSlice";
+import { useFetchBasketQuery } from "../basket/basketApi";
 
 type LinkItem = { title: string; path: string };
 
@@ -42,7 +43,9 @@ export default function Navbar() {
   const dispatch = useAppDispatch();
   const darkMode = useAppSelector((s) => s.ui.darkMode);
   const isLoading = useAppSelector((s) => s.ui.isLoading);
-
+  const {data: basket} = useFetchBasketQuery();
+  
+  const itemCount = basket?.items.reduce((sum, item) => sum + item.quantity, 0) || 0;
   return (
     <AppBar position="fixed">
       <Toolbar
@@ -85,11 +88,17 @@ export default function Navbar() {
 
         {/* 우측: 장바구니 + 로그인/회원가입 */}
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-          <IconButton size="large" sx={{ color: "inherit" }} aria-label="open cart">
-            <Badge badgeContent={4} color="secondary">
-              <ShoppingCartIcon />
-            </Badge>
-          </IconButton>
+            <IconButton
+                component={Link}
+                to="/basket"             // ✅ 경로 지정
+                size="large"
+                sx={{ color: "inherit" }}
+                aria-label="open cart"
+              >
+                <Badge badgeContent={itemCount} color="secondary">
+                  <ShoppingCartIcon />
+                </Badge>
+            </IconButton>
 
           <List sx={{ display: "flex", gap: 1.5, alignItems: "center", m: 0, p: 0 }}>
             {rightLinks.map(({ title, path }) => (

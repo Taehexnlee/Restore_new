@@ -5,11 +5,13 @@ import uiReducer from "../layout/uiSlice";
 import { catalogApi } from "../../features/catalog/catalogApi";
 import { errorApi } from "../../features/about/errorApi";
 import { basketApi } from "../basket/basketApi";
+import { catalogSlice } from "../../features/catalog/catalogSlice";
 
 export const store = configureStore({
   reducer: {
     counter: counterReducer,
     ui: uiReducer, // ✅ 추가
+    catalog : catalogSlice.reducer,
     [catalogApi.reducerPath]: catalogApi.reducer,
     [errorApi.reducerPath]: errorApi.reducer,
     [basketApi.reducerPath]: basketApi.reducer,

@@ -4,6 +4,7 @@ import counterReducer from "../../features/contact/counterReducer";
 import uiReducer from "../layout/uiSlice";
 import { catalogApi } from "../../features/catalog/catalogApi";
 import { errorApi } from "../../features/about/errorApi";
+import { basketApi } from "../basket/basketApi";
 
 export const store = configureStore({
   reducer: {
@@ -11,9 +12,10 @@ export const store = configureStore({
     ui: uiReducer, // ✅ 추가
     [catalogApi.reducerPath]: catalogApi.reducer,
     [errorApi.reducerPath]: errorApi.reducer,
+    [basketApi.reducerPath]: basketApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(catalogApi.middleware, errorApi.middleware),
+    getDefaultMiddleware().concat(catalogApi.middleware, errorApi.middleware, basketApi.middleware),
 });
 
 export type RootState = ReturnType<typeof store.getState>;

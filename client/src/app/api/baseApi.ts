@@ -10,7 +10,7 @@ import { toast } from 'react-toastify';
 import type { ErrorResponse } from 'react-router';
 import { router } from '../routes/Routes';
   
-  const rawBaseQuery = fetchBaseQuery({ baseUrl: 'https://localhost:5001/api' });
+  const rawBaseQuery = fetchBaseQuery({ baseUrl: 'https://localhost:5001/api', credentials: 'include' });
   const sleep = () => new Promise<void>((r) => setTimeout(r, 1000));
   
   export const baseQueryWithErrorHandling: BaseQueryFn<

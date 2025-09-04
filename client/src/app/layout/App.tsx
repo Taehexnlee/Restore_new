@@ -1,6 +1,6 @@
 // src/app/layout/App.tsx
 import { CssBaseline, ThemeProvider, createTheme, Container } from '@mui/material';
-import { Outlet } from 'react-router-dom';
+import { Outlet, ScrollRestoration } from 'react-router-dom';
 import Navbar from './Navbar';
 import { useAppSelector } from '../store/store';
 
@@ -13,6 +13,7 @@ export default function App() {
 
   return (
     <ThemeProvider theme={theme}>
+      <ScrollRestoration/>
       <CssBaseline />
       <Navbar />
       <Container maxWidth="xl" sx={{ mt: 10, mb: 4 }}>

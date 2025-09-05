@@ -18,6 +18,10 @@ import { useAppDispatch, useAppSelector } from "../store/store";
 import { toggleDarkMode } from "./uiSlice";
 import { useFetchBasketQuery } from "../basket/basketApi";
 
+// ⬇️ 추가: 계정 API 훅 + UserMenu
+import UserMenu from "./UserMenu";
+import { useUserInfoQuery, useLogoutMutation } from "../../features/account/accountsApi";
+
 type LinkItem = { title: string; path: string };
 
 const midLinks: LinkItem[] = [
@@ -43,9 +47,25 @@ export default function Navbar() {
   const dispatch = useAppDispatch();
   const darkMode = useAppSelector((s) => s.ui.darkMode);
   const isLoading = useAppSelector((s) => s.ui.isLoading);
-  const {data: basket} = useFetchBasketQuery();
-  
-  const itemCount = basket?.items.reduce((sum, item) => sum + item.quantity, 0) || 0;
+
+  // 장바구니
+  const { data: basket } = useFetchBasketQuery();
+  const itemCount =
+    basket?.items.reduce((sum, item) => sum + item.quantity, 0) || 0;
+
+  // ⬇️ 추가: 로그인 유지용 사용자 정보 & 로그아웃 훅
+  const { data: user } = useUserInfoQuery(); // (204면 undefined로 옴)
+  const [logout] = useLogoutMutation();
+
+  const handleLogout = async () => {
+    try {
+      await logout().unwrap();
+      // 필요하면 여기서 리다이렉트/토스트 처리
+    } catch {
+      // 무시 또는 에러 처리
+    }
+  };
+
   return (
     <AppBar position="fixed">
       <Toolbar
@@ -73,7 +93,11 @@ export default function Navbar() {
             onClick={() => dispatch(toggleDarkMode())}
             aria-label="toggle theme"
           >
-            {darkMode ? <DarkModeIcon /> : <LightModeIcon sx={{ color: "yellow" }} />}
+            {darkMode ? (
+              <DarkModeIcon />
+            ) : (
+              <LightModeIcon sx={{ color: "yellow" }} />
+            )}
           </IconButton>
         </Box>
 
@@ -86,27 +110,31 @@ export default function Navbar() {
           ))}
         </List>
 
-        {/* 우측: 장바구니 + 로그인/회원가입 */}
+        {/* 우측: 장바구니 + (로그인 여부에 따라) UserMenu / 로그인·회원가입 */}
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-            <IconButton
-                component={Link}
-                to="/basket"             // ✅ 경로 지정
-                size="large"
-                sx={{ color: "inherit" }}
-                aria-label="open cart"
-              >
-                <Badge badgeContent={itemCount} color="secondary">
-                  <ShoppingCartIcon />
-                </Badge>
-            </IconButton>
+          <IconButton
+            component={Link}
+            to="/basket"
+            size="large"
+            sx={{ color: "inherit" }}
+            aria-label="open cart"
+          >
+            <Badge badgeContent={itemCount} color="secondary">
+              <ShoppingCartIcon />
+            </Badge>
+          </IconButton>
 
-          <List sx={{ display: "flex", gap: 1.5, alignItems: "center", m: 0, p: 0 }}>
-            {rightLinks.map(({ title, path }) => (
-              <ListItem key={path} component={NavLink} to={path} sx={navStyles}>
-                {title.toUpperCase()}
-              </ListItem>
-            ))}
-          </List>
+          {user ? (
+            <UserMenu user={user} onLogout={handleLogout} />
+          ) : (
+            <List sx={{ display: "flex", gap: 1.5, alignItems: "center", m: 0, p: 0 }}>
+              {rightLinks.map(({ title, path }) => (
+                <ListItem key={path} component={NavLink} to={path} sx={navStyles}>
+                  {title.toUpperCase()}
+                </ListItem>
+              ))}
+            </List>
+          )}
         </Box>
       </Toolbar>
 

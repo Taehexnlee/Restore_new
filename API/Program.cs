@@ -1,13 +1,14 @@
+// Program.cs
 using API.Data;
+using API.Entities;
 using API.Middleware;
-using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
 builder.Services.AddControllers();
+
 builder.Services.AddDbContext<StoreContext>(opt =>
 {
     opt.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"));
@@ -16,17 +17,34 @@ builder.Services.AddDbContext<StoreContext>(opt =>
 builder.Services.AddCors();
 builder.Services.AddTransient<ExceptionMiddleware>();
 
+builder.Services
+    .AddIdentityApiEndpoints<User>(opt =>
+    {
+        opt.User.RequireUniqueEmail = true;
+    })
+    .AddRoles<IdentityRole>()                 // ✅ 먼저
+    .AddEntityFrameworkStores<StoreContext>(); // ✅ 그 다음
+
+builder.Services.AddAuthorization(); // 선택이지만 함께 두는 걸 권장
+
 var app = builder.Build();
 
 app.UseMiddleware<ExceptionMiddleware>();
 
 app.UseCors(opt =>
 {
-    opt.AllowAnyHeader().AllowAnyMethod().AllowCredentials().WithOrigins("https://localhost:3000");
+    opt.AllowAnyHeader()
+       .AllowAnyMethod()
+       .AllowCredentials()
+       .WithOrigins("https://localhost:3000");
 });
 
-app.MapControllers();
+app.UseAuthentication();
+app.UseAuthorization();
 
-DbInitializer.InitDb(app);
+app.MapControllers();
+app.MapGroup("api").MapIdentityApi<User>();
+
+await DbInitializer.InitDb(app);  // ✅ 경고 제거 + 시딩 안정화
 
 app.Run();

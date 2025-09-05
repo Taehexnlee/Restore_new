@@ -1,28 +1,49 @@
+using System.Threading.Tasks;
 using API.Entities;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Data;
 
 public class DbInitializer
 {
-    public static void InitDb(WebApplication app)
+    public static async Task InitDb(WebApplication app)
     {
-        using var scope = app.Services.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<StoreContext>();
+        using var scope      = app.Services.CreateScope();
+        var context          = scope.ServiceProvider.GetRequiredService<StoreContext>();
+        var userManager      = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
 
-        SeedData(context);
-
+        await SeedData(context, userManager); // ✅ await 호출
     }
 
-    private static void SeedData(StoreContext context)
+    private static async Task SeedData(StoreContext context, UserManager<User> userManager)
     {
         context.Database.Migrate();
+        if (!userManager.Users.Any())
+        {
+            // admin
+            var admin = new User
+            {
+                UserName = "admin@test.com",
+                Email = "admin@test.com"
+            };
+            await userManager.CreateAsync(admin, "Pa$$w0rd");
+            await userManager.AddToRolesAsync(admin, new[] { "Member", "Admin" });
 
-        // 이미 Products 테이블에 데이터 있으면 시드 안 함
-        if (context.Products.Any()) return;
+            // bob
+            var bob = new User
+            {
+                UserName = "bob@test.com",
+                Email = "bob@test.com"
+            };
+            await userManager.CreateAsync(bob, "Pa$$w0rd");
+            await userManager.AddToRoleAsync(bob, "Member");
 
-        // 샘플 데이터 넣기
-        var products = new List<Product>
+            // 이미 Products 테이블에 데이터 있으면 시드 안 함
+            if (context.Products.Any()) return;
+
+            // 샘플 데이터 넣기
+            var products = new List<Product>
         {
                 new() {
                     Name = "Angular Speedster Board 2000",
@@ -203,9 +224,10 @@ public class DbInitializer
                     QuantityInStock = 100
                 }
         };
-        
 
-        context.Products.AddRange(products);
-        context.SaveChanges();
+
+            context.Products.AddRange(products);
+            context.SaveChanges();
+        }
     }
 }

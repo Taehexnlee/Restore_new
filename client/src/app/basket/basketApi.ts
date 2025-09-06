@@ -77,9 +77,17 @@ export const basketApi = createApi({
                     patchResult.undo();
                 }
             },
-        })
+        }),
+        clearBasket: builder.mutation<void, void>({
+            queryFn: () => ({data: undefined}),
+            onQueryStarted: async (_, {dispatch}) => {
+                dispatch(basketApi.util.updateQueryData("fetchBasket", undefined, (draft) => {
+                    draft.items = [];
+                }
+                ));
+            }
     })
-});
+}),
 
-export const {useFetchBasketQuery, useAddBasketItemMutation, useRemoveBasketItemMutation} = basketApi;
+export const {useFetchBasketQuery, useAddBasketItemMutation, useRemoveBasketItemMutation, useClearBasketMutation} = basketApi;
             

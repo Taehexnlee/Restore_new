@@ -1,15 +1,16 @@
 // src/app/shared/OrderSummary.tsx
 import { Box, Paper, Typography, Divider, Button, TextField, Stack } from "@mui/material";
 import { currencyFormat } from "../../../lib/util";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
+import { useFetchBasketQuery } from "../../basket/basketApi";
 
-type Props = {
-  subtotal: number;     // cents
-  deliveryFee: number;  // cents
-};
 
-export default function OrderSummary({ subtotal, deliveryFee }: Props) {
+export default function OrderSummary() {
+  const {data: basket} = useFetchBasketQuery();
+  const subtotal = basket?.items.reduce((sum, item) => sum + (item.price * item.quantity), 0) ?? 0;
+  const deliveryFee = subtotal > 10000 ? 0 : 500; // cents
   const total = subtotal + deliveryFee;
+  const location = useLocation();
 
   return (
     <Box sx={{ position: "sticky", top: 88 }}>
@@ -42,15 +43,17 @@ export default function OrderSummary({ subtotal, deliveryFee }: Props) {
         </Box>
 
         <Stack direction="row" spacing={1.5} sx={{ mb: 2 }}>
+          {!location.pathname.includes("checkout") &&
           <Button
               component={Link}
               to="/checkout"
               variant="contained"
               fullWidth
               sx={{ height: 48 }}
+
             >
               Checkout
-          </Button>
+          </Button>}
             <Button
               component={Link}
               to="/catalog"

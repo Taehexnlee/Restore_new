@@ -7,11 +7,13 @@ import {
   } from '@reduxjs/toolkit/query/react';
   import { startLoading, stopLoading } from '../layout/uiSlice';
 import { toast } from 'react-toastify';
-import type { ErrorResponse } from 'react-router';
 import { router } from '../routes/Routes';
   
-  const rawBaseQuery = fetchBaseQuery({ baseUrl: 'https://localhost:5001/api', credentials: 'include' });
+  const rawBaseQuery = fetchBaseQuery({ baseUrl: import.meta.env.VITE_API_URL, credentials: 'include' });
   const sleep = () => new Promise<void>((r) => setTimeout(r, 1000));
+  
+  // Narrowing helpers for unknown error payloads
+  const isRecord = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null;
   
   export const baseQueryWithErrorHandling: BaseQueryFn<
     string | FetchArgs,
@@ -34,15 +36,15 @@ import { router } from '../routes/Routes';
         ? result.error.originalStatus
         : result.error.status;
 
-      const responseData = result.error.data as ErrorResponse;
+      const responseData: unknown = result.error.data;
       switch (originalStatus) {
         case 400: {
           if (typeof responseData === 'string') {
             // 문자열 본문
             toast.error(responseData);
-          } else if (typeof responseData === 'object' && 'errors' in responseData) {
+          } else if (isRecord(responseData) && 'errors' in responseData) {
             toast.error('Validation error');
-          } else if (typeof responseData === 'object' && 'title' in responseData) {
+          } else if (isRecord(responseData) && typeof responseData.title === 'string') {
             // ProblemDetails 형태
             toast.error(responseData.title);
           } else {
@@ -51,7 +53,7 @@ import { router } from '../routes/Routes';
           break;
         }
         case 401: {
-          if (typeof responseData === 'object' && 'title' in responseData) {
+          if (isRecord(responseData) && typeof responseData.title === 'string') {
             toast.error(responseData.title);
           } else {
             toast.error('Unauthorized');
@@ -63,7 +65,7 @@ import { router } from '../routes/Routes';
           break;
         }
         case 500: {
-          if (typeof responseData === 'object' && 'title' in responseData) {
+          if (isRecord(responseData) && typeof responseData.title === 'string') {
             router.navigate('/server-error', {
               state: { error : responseData },
             });          

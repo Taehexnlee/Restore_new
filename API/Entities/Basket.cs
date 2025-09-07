@@ -13,6 +13,10 @@ public class Basket
 
     // 1:N 관계 - 장바구니의 아이템들
     public List<BasketItem> Items { get; set; } = new();
+    
+    public string? ClientSecret { get; set; }
+    public string? PaymentIntentId { get; set; }
+    
 
     /// <summary>
     /// 장바구니에 상품 추가 (기존 존재 시 수량 증가)
@@ -33,8 +37,8 @@ public class Basket
             Items.Add(new BasketItem
             {
                 ProductId = product.Id,
-                Product   = product,
-                Quantity  = quantity
+                Product = product,
+                Quantity = quantity
             });
         }
         else

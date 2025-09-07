@@ -2,6 +2,8 @@ import { createApi } from "@reduxjs/toolkit/query/react";
 import { baseQueryWithErrorHandling } from "../api/baseApi";
 import { Item, type Basket } from "../models/basket";
 import type { Product } from "../models/product";
+import Cookies from "js-cookie";
+
 
 function isBasketItem(product: Product | Item): product is Item {
     return (product as Item).quantity !== undefined;
@@ -79,15 +81,21 @@ export const basketApi = createApi({
             },
         }),
         clearBasket: builder.mutation<void, void>({
-            queryFn: () => ({data: undefined}),
-            onQueryStarted: async (_, {dispatch}) => {
-                dispatch(basketApi.util.updateQueryData("fetchBasket", undefined, (draft) => {
-                    draft.items = [];
-                }
-                ));
-            }
+            // API 호출 없이 RTKQ 캐시만 조작할 때는 queryFn 사용
+            queryFn: async () => ({ data: undefined }),
+            async onQueryStarted(_, { dispatch }) {
+              // 1) RTK Query 캐시의 fetchBasket 데이터 비우기
+              dispatch(
+                basketApi.util.updateQueryData("fetchBasket", undefined, (draft) => {
+                  if (draft) draft.items = [];
+                })
+              );
+              // 2) 브라우저 basketId 쿠키 제거
+              Cookies.remove("basketId");
+            },
+          }),
     })
-}),
+})
 
 export const {useFetchBasketQuery, useAddBasketItemMutation, useRemoveBasketItemMutation, useClearBasketMutation} = basketApi;
             

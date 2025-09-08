@@ -14,6 +14,8 @@ import LoginForm from "../../features/account/LoginForm";
 import RegisterForm from "../../features/account/RegisterForm";
 import RequireAuth from "./RequireAuth";
 import CheckoutSuccess from "../../features/checkout/CheckoutSuccess";
+import OrdersPage from "../../features/orders/OrdersPage";
+import OrderDetailsPage from "../../features/orders/OrderDetailedPage";
 
 export const router = createBrowserRouter([
   {
@@ -23,7 +25,8 @@ export const router = createBrowserRouter([
       {element: <RequireAuth />, children:[
         { path: "checkout", element: <CheckoutPage /> },
         { path: "checkout/success", element: <CheckoutSuccess /> },
-
+        { path: "orders", element: <OrdersPage /> },
+        { path: "orders/:id",      element: <OrderDetailsPage /> } // ✅ 상대경로
       ]}, // index 속성 사용법
       { path: "", element: <HomePage /> },
       { path: "catalog", element: <Catalog /> },

@@ -8,6 +8,7 @@ import PersonIcon from "@mui/icons-material/Person";
 import HistoryIcon from "@mui/icons-material/History";
 import LogoutIcon from "@mui/icons-material/Logout";
 import type { User } from "../models/user";
+import { Link } from "react-router-dom";
 
 type Props = {
   user: User;
@@ -39,7 +40,7 @@ export default function UserMenu({ user, onLogout }: Props) {
           <ListItemText primary="My Profile" />
         </MenuItem>
 
-        <MenuItem onClick={handleClose}>
+        <MenuItem component={Link} to="/orders">
           <ListItemIcon><HistoryIcon fontSize="small" /></ListItemIcon>
           <ListItemText primary="My Orders" />
         </MenuItem>

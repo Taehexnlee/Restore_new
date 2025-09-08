@@ -4,98 +4,124 @@ import { Item, type Basket } from "../models/basket";
 import type { Product } from "../models/product";
 import Cookies from "js-cookie";
 
-
 function isBasketItem(product: Product | Item): product is Item {
-    return (product as Item).quantity !== undefined;
+  return (product as Item).quantity !== undefined;
 }
 
 export const basketApi = createApi({
-    reducerPath: "basketApi",
-    baseQuery: baseQueryWithErrorHandling,
-    tagTypes: ["Basket"],
-    endpoints: (builder) => ({
-        fetchBasket: builder.query<Basket, void>({
-            query: () => "basket",
-            providesTags: ["Basket"]
-        }),
-        addBasketItem: builder.mutation<Basket, { product: Product| Item; quantity: number }>({
-            query: ({ product, quantity }) => {
-                const productId = isBasketItem(product) ? product.productId : product.id;
-                return {
-                    url:`basket?productId=${productId}&quantity=${quantity}`,
-                    method: "POST" 
-                }
-            },
-            onQueryStarted: async ({product, quantity}, {dispatch, queryFulfilled}) => {
-                let isNewBasket = false;
-                const patchResult = dispatch(
-                    basketApi.util.updateQueryData("fetchBasket", undefined, (draft) => {
-                        const productId = isBasketItem(product) ? product.productId : product.id;
+  reducerPath: "basketApi",
+  baseQuery: baseQueryWithErrorHandling,
+  tagTypes: ["Basket"],
+  endpoints: (builder) => ({
+    fetchBasket: builder.query<Basket, void>({
+      query: () => "basket",
+      providesTags: ["Basket"],
+    }),
 
-                        if(!draft.basketId) isNewBasket = true;
-                           
+    addBasketItem: builder.mutation<Basket, { product: Product | Item; quantity: number }>({
+      query: ({ product, quantity }) => {
+        const productId = isBasketItem(product) ? product.productId : product.id;
+        return {
+          url: `basket?productId=${productId}&quantity=${quantity}`,
+          method: "POST",
+        };
+      },
+      onQueryStarted: async ({ product, quantity }, { dispatch, queryFulfilled }) => {
+        let isNewBasket = false;
+        let patchResult: { undo: () => void } | undefined;
 
-                        if(!isNewBasket)
-                        {   
-                            const existingItem = draft.items.find(i => i.productId === productId);
-                            if (existingItem) {
-                                existingItem.quantity += quantity;
-                            }else draft.items.push(isBasketItem(product)? product : {...product, productId: product.id, quantity});
-                        }
-                    }
-                    )
+        try {
+          patchResult = dispatch(
+            basketApi.util.updateQueryData("fetchBasket", undefined, (draft) => {
+              // 캐시에 아직 basket이 없을 수 있음 (없으면 updateQueryData 자체가 throw 될 수 있음)
+              const productId = isBasketItem(product) ? product.productId : product.id;
+
+              if (!draft.basketId) {
+                isNewBasket = true;
+                return; // 새로운 바스켓은 응답으로 갱신
+              }
+
+              const existing = draft.items.find((i) => i.productId === productId);
+              if (existing) {
+                existing.quantity += quantity;
+              } else {
+                draft.items.push(
+                  isBasketItem(product)
+                    ? product
+                    : { ...product, productId: product.id, quantity }
                 );
-                try {
-                    await queryFulfilled;
-                    if(isNewBasket) dispatch(basketApi.util.invalidateTags(["Basket"]));
-                }catch (error) {
-                    console.log(error);
-                    patchResult.undo();
-                }
-            },
-        }),
-        removeBasketItem: builder.mutation<void, { productId: number; quantity: number }>({
-            query: ({ productId, quantity }) => ({
-                url: `basket?productId=${productId}&quantity=${quantity}`,
-                method: "DELETE"
-            }),
-            onQueryStarted: async ({productId, quantity}, {dispatch, queryFulfilled}) => {
-                const patchResult = dispatch(
-                    basketApi.util.updateQueryData("fetchBasket", undefined, (draft) => {
-                        const itemIndex = draft.items.findIndex(i => i.productId === productId);
-                        if(itemIndex >= 0) {
-                            draft.items[itemIndex].quantity -= quantity;
-                            if(draft.items[itemIndex].quantity <=0) {
-                                draft.items.splice(itemIndex, 1);
-                            }
-                        }
-                    }
-                    )
-                );
-                try {
-                    await queryFulfilled;
-                }catch (error) {
-                    console.log(error);
-                    patchResult.undo();
-                }
-            },
-        }),
-        clearBasket: builder.mutation<void, void>({
-            // API 호출 없이 RTKQ 캐시만 조작할 때는 queryFn 사용
-            queryFn: async () => ({ data: undefined }),
-            async onQueryStarted(_, { dispatch }) {
-              // 1) RTK Query 캐시의 fetchBasket 데이터 비우기
-              dispatch(
-                basketApi.util.updateQueryData("fetchBasket", undefined, (draft) => {
-                  if (draft) draft.items = [];
-                })
-              );
-              // 2) 브라우저 basketId 쿠키 제거
-              Cookies.remove("basketId");
-            },
-          }),
-    })
-})
+              }
+            })
+          );
+        } catch {
+          // 캐시가 없어서 updateQueryData가 실패한 경우
+          isNewBasket = true;
+        }
 
-export const {useFetchBasketQuery, useAddBasketItemMutation, useRemoveBasketItemMutation, useClearBasketMutation} = basketApi;
-            
+        try {
+          await queryFulfilled;
+          if (isNewBasket) dispatch(basketApi.util.invalidateTags(["Basket"]));
+        } catch {
+          patchResult?.undo?.();
+        }
+      },
+    }),
+
+    removeBasketItem: builder.mutation<void, { productId: number; quantity: number }>({
+      query: ({ productId, quantity }) => ({
+        url: `basket?productId=${productId}&quantity=${quantity}`,
+        method: "DELETE",
+      }),
+      onQueryStarted: async ({ productId, quantity }, { dispatch, queryFulfilled }) => {
+        let patchResult: { undo: () => void } | undefined;
+        try {
+          patchResult = dispatch(
+            basketApi.util.updateQueryData("fetchBasket", undefined, (draft) => {
+              const idx = draft.items.findIndex((i) => i.productId === productId);
+              if (idx >= 0) {
+                draft.items[idx].quantity -= quantity;
+                if (draft.items[idx].quantity <= 0) {
+                  draft.items.splice(idx, 1);
+                }
+              }
+            })
+          );
+        } catch {
+          // 캐시가 아직 없을 수 있음: 낙관적 업데이트 생략
+        }
+
+        try {
+          await queryFulfilled;
+        } catch {
+          patchResult?.undo?.();
+        }
+      },
+    }),
+
+    clearBasket: builder.mutation<void, void>({
+      // 서버 호출 없이 캐시/쿠키만 정리
+      queryFn: async () => ({ data: undefined }),
+      async onQueryStarted(_, { dispatch }) {
+        try {
+          dispatch(
+            basketApi.util.updateQueryData("fetchBasket", undefined, (draft) => {
+              draft.items = [];
+              draft.basketId = "";
+              // (draft as any).clientSecret = "";
+            })
+          );
+        } catch {
+          // 캐시 미존재 시 무시
+        }
+        Cookies.remove("basketId");
+      },
+    }),
+  }),
+});
+
+export const {
+  useFetchBasketQuery,
+  useAddBasketItemMutation,
+  useRemoveBasketItemMutation,
+  useClearBasketMutation,
+} = basketApi;

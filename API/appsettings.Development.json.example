@@ -1,0 +1,21 @@
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "AllowedHosts": "*",
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=localhost,1433;Database=shop;User Id=sa;Password=Password@1;TrustServerCertificate=True;"
+  },
+
+  "StripeSettings": {
+      "PublishableKey": "YOUR_STRIPE_PUBLISHABLE_KEY",
+      "SecretKey": "YOUR_STRIPE_SECRET_KEY",
+      "WebhookSecret": "YOUR_STRIPE_WEBHOOK_SECRET"
+    }
+  
+}
+
+

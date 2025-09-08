@@ -23,7 +23,7 @@ import { router } from '../routes/Routes';
     FetchBaseQueryMeta
   > = async (args, api, extraOptions) => {
     api.dispatch(startLoading());
-    await sleep();
+    if(import.meta.env.DEV) await sleep();
   
     const result = await rawBaseQuery(args, api, extraOptions);
   

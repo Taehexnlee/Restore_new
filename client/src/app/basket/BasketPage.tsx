@@ -3,7 +3,6 @@ import { Container, Typography, Box } from "@mui/material";
 import { useFetchBasketQuery } from "./basketApi";
 import BasketItem from "./BasketItem";
 import OrderSummary from "../shared/components/OrderSummary";
-import type { Item } from "../models/basket";
 
 export default function BasketPage() {
   const { data: basket, isLoading } = useFetchBasketQuery();
@@ -16,14 +15,7 @@ export default function BasketPage() {
     </Container>;
   }
 
-  // subtotal(센트)
-  const subtotal = basket.items.reduce<number>(
-    (sum, item: Item) => sum + item.price * item.quantity,
-    0
-  );
-
-  // 배송비(센트): $100(=10000c) 초과면 무료, 아니면 $5(=500c)
-  const deliveryFee = subtotal > 10000 ? 0 : 500;
+  // 요약 정보는 OrderSummary 내부의 useBasket 훅에서 계산
 
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 6 }}>
@@ -49,7 +41,7 @@ export default function BasketPage() {
 
         {/* 오른쪽: 주문 요약 (OrderSummary 자체가 Paper 포함) */}
         <Box sx={{ width: { xs: "100%", md: 380 } }}>
-          <OrderSummary subtotal={subtotal} deliveryFee={deliveryFee} />
+          <OrderSummary />
         </Box>
       </Box>
     </Container>

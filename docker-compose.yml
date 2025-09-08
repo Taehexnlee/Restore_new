@@ -1,0 +1,15 @@
+services:
+  sql:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "Password@1"
+    ports:
+      - "1433:1433"
+    volumes:
+      - sql_data:/var/opt/mssql
+    # ⬇︎ ARM/Mac이면 필요 (Windows/Intel은 생략)
+    platform: "linux/amd64"
+
+volumes:
+  sql_data:

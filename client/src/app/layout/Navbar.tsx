@@ -18,7 +18,7 @@ import { useAppDispatch, useAppSelector } from "../store/store";
 import { toggleDarkMode } from "./uiSlice";
 import { useFetchBasketQuery } from "../basket/basketApi";
 
-// ⬇️ 추가: 계정 API 훅 + UserMenu
+// Account API hooks and user menu component
 import UserMenu from "./UserMenu";
 import { useUserInfoQuery, useLogoutMutation } from "../../features/account/accountsApi";
 
@@ -48,21 +48,21 @@ export default function Navbar() {
   const darkMode = useAppSelector((s) => s.ui.darkMode);
   const isLoading = useAppSelector((s) => s.ui.isLoading);
 
-  // 장바구니
+  // Basket state
   const { data: basket } = useFetchBasketQuery();
   const itemCount =
     basket?.items.reduce((sum, item) => sum + item.quantity, 0) || 0;
 
-  // ⬇️ 추가: 로그인 유지용 사용자 정보 & 로그아웃 훅
-  const { data: user } = useUserInfoQuery(); // (204면 undefined로 옴)
+  // Fetch current user information and logout mutation
+  const { data: user } = useUserInfoQuery(); // 204 responses arrive as undefined
   const [logout] = useLogoutMutation();
 
   const handleLogout = async () => {
     try {
       await logout().unwrap();
-      // 필요하면 여기서 리다이렉트/토스트 처리
+      // Place additional redirect/toast logic here if desired
     } catch {
-      // 무시 또는 에러 처리
+      // Ignore or handle errors as needed
     }
   };
 
@@ -76,7 +76,7 @@ export default function Navbar() {
           gap: 2,
         }}
       >
-        {/* 좌측: 로고 + 테마 토글 */}
+        {/* Left: logo and theme toggle */}
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
           <Typography
             variant="h6"
@@ -101,7 +101,7 @@ export default function Navbar() {
           </IconButton>
         </Box>
 
-        {/* 중앙: 네비 링크 */}
+        {/* Center: navigation links */}
         <List sx={{ display: "flex", gap: 2, alignItems: "center", m: 0, p: 0 }}>
           {midLinks.map(({ title, path }) => (
             <ListItem key={path} component={NavLink} to={path} sx={navStyles}>
@@ -110,7 +110,7 @@ export default function Navbar() {
           ))}
         </List>
 
-        {/* 우측: 장바구니 + (로그인 여부에 따라) UserMenu / 로그인·회원가입 */}
+        {/* Right: basket plus user menu or auth links */}
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
           <IconButton
             component={Link}
@@ -138,7 +138,7 @@ export default function Navbar() {
         </Box>
       </Toolbar>
 
-      {/* 전역 로딩바 */}
+      {/* Global loading bar */}
       {isLoading && (
         <Box sx={{ width: "100%" }}>
           <LinearProgress color="secondary" />

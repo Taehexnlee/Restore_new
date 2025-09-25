@@ -1,14 +1,14 @@
 // src/features/catalog/catalogApi.ts
 import { createApi } from "@reduxjs/toolkit/query/react";
 import type { Product } from "../../app/models/product";
-import { baseQueryWithErrorHandling } from "../../app/api/baseApi"; // ✅ 커스텀 쿼리
+import { baseQueryWithErrorHandling } from "../../app/api/baseApi"; // Custom base query with error handling
 import type { ProductParams } from "../../app/models/productParams";
 import { filterEmptyValues } from "../../lib/util";
 import type { Pagination } from "../../app/models/pagination";
 
 export const catalogApi = createApi({
   reducerPath: 'catalogApi',
-  baseQuery: baseQueryWithErrorHandling,   // ✅ 교체
+  baseQuery: baseQueryWithErrorHandling,   // Use shared base query implementation
   endpoints: (builder) => ({
     fetchProducts: builder.query<{items: Product[], pagination: Pagination}, ProductParams>({
       query: (productParams) => { 

@@ -1,8 +1,8 @@
-// 서버의 OrderDto 모양과 1:1 매칭
+// Mirror the server's OrderDto shape
 export interface ShippingAddress {
     name: string;
     line1: string;
-    line2?: string;              // 서버에서 null 일 수 있으니 optional
+    line2?: string;              // Optional because the server may return null
     city: string;
     state: string;
     postal_code: string;
@@ -10,7 +10,7 @@ export interface ShippingAddress {
   }
   
   export interface PaymentSummary {
-    last4: number | string              // 서버는 int
+    last4: number | string;             // Server returns an int
     brand: string;
     expMonth: number;
     expYear: number;
@@ -38,8 +38,8 @@ export interface ShippingAddress {
     paymentSummary: PaymentSummary;
   }
   
-  // 서버로 보내는 CreateOrderDto
+  // Payload sent to the server as CreateOrderDto
   export interface CreateOrder {
     shippingAddress: ShippingAddress;
     paymentSummary: PaymentSummary;
-  } 
+  }

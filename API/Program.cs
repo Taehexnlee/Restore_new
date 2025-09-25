@@ -24,10 +24,10 @@ builder.Services
     {
         opt.User.RequireUniqueEmail = true;
     })
-    .AddRoles<IdentityRole>()                 // ✅ 먼저
-    .AddEntityFrameworkStores<StoreContext>(); // ✅ 그 다음
+    .AddRoles<IdentityRole>()                 // Register roles before wiring stores
+    .AddEntityFrameworkStores<StoreContext>(); // Finish identity setup with EF stores
 
-builder.Services.AddAuthorization(); // 선택이지만 함께 두는 걸 권장
+builder.Services.AddAuthorization(); // Keep authorization with identity configuration
 
 var app = builder.Build();
 
@@ -49,10 +49,10 @@ app.UseAuthorization();
 
 app.MapControllers();
 app.MapGroup("api").MapIdentityApi<User>();
-app.MapFallbackToController("Index", "Fallback"); // ← 2-1안: 컨트롤러 방식
+app.MapFallbackToController("Index", "Fallback"); // Use controller-based SPA fallback
 
 
-await DbInitializer.InitDb(app);  // ✅ 경고 제거 + 시딩 안정화
+await DbInitializer.InitDb(app);  // Apply migrations and seed sample data
 
 
 app.Run();

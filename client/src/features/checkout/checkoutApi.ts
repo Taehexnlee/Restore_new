@@ -17,7 +17,7 @@ export const checkoutApi = createApi({
       async onQueryStarted(_, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
-          // ✅ Basket 캐시 업데이트 (clientSecret 반영)
+          // Update basket cache with the new clientSecret
           dispatch(
             basketApi.util.updateQueryData("fetchBasket", undefined, (draft) => {
               draft.clientSecret = data.clientSecret;

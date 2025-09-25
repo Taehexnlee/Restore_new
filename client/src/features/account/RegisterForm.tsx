@@ -30,7 +30,7 @@ import {
     const onSubmit = async (data: RegisterSchema) => {
         await registerUser(data).unwrap();
   
-        // ✅ 회원가입 성공 UX
+        // Provide feedback after a successful registration
         toast.success('Registration successful! You can now sign in.');
         navigate('/login');
       

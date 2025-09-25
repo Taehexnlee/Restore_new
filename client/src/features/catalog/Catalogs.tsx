@@ -11,11 +11,11 @@ export default function CatalogPage() {
   const dispatch = useAppDispatch();
   const productParams = useAppSelector((s) => s.catalog);
 
-  // 제품 + 필터를 상위에서 로딩
+  // Fetch products and filter metadata together
   const { data, isLoading } = useFetchProductsQuery(productParams);
   const { data: filtersData, isLoading: filtersLoading } = useFetchfiltersQuery();
 
-  // 로딩 조건 수정: filtersLoading 그대로 사용, !filtersLoading 아님
+  // Guard on isLoading/filtersLoading without negating the filter flag
   if (isLoading || filtersLoading || !data || !filtersData) {
     return <Typography variant="h3">Loading...</Typography>;
   }
@@ -28,12 +28,12 @@ export default function CatalogPage() {
       <Typography variant="h3" gutterBottom>Catalog</Typography>
 
       <Grid2 container spacing={4}>
-        {/* 왼쪽: 필터 영역 */}
+        {/* Left column: filter controls */}
         <Grid2 size={3}>
           <Filters filtersData={filtersData} />
         </Grid2>
 
-        {/* 오른쪽: 상품 리스트 + 페이지네이션 */}
+        {/* Right column: product list and pagination */}
         <Grid2 size={9}>
           {items.length > 0 ? (
             <>

@@ -8,10 +8,10 @@ public class Basket
 {
     public int Id { get; set; }
 
-    // 브라우저(쿠키/로컬)에 보관할 식별자
+    // Identifier persisted in the browser via cookie/local storage
     public required string BasketId { get; set; }
 
-    // 1:N 관계 - 장바구니의 아이템들
+    // Items belonging to this basket
     public List<BasketItem> Items { get; set; } = new();
     
     public string? ClientSecret { get; set; }
@@ -19,21 +19,21 @@ public class Basket
     
 
     /// <summary>
-    /// 장바구니에 상품 추가 (기존 존재 시 수량 증가)
+    /// Add an item to the basket, increasing quantity if it already exists
     /// </summary>
     public void AddItem(Product product, int quantity)
     {
-        // 방어적 코드
+        // Defensive guard clauses
         ArgumentNullException.ThrowIfNull(product);
         if (quantity <= 0)
             throw new ArgumentException("Quantity should be greater than zero.", nameof(quantity));
 
-        // 이미 담긴 아이템인지 확인
+        // Check whether the item already exists
         var existingItem = FindItem(product.Id);
 
         if (existingItem is null)
         {
-            // 새 아이템 추가
+            // Add a brand new item
             Items.Add(new BasketItem
             {
                 ProductId = product.Id,
@@ -43,13 +43,13 @@ public class Basket
         }
         else
         {
-            // 기존 수량 증가 (복합 대입 연산자로 간결하게)
+            // Increase quantity on the existing item
             existingItem.Quantity += quantity;
         }
     }
 
     /// <summary>
-    /// 장바구니에서 상품 수량 감소 / 0이하가 되면 제거
+    /// Reduce quantity or remove if the count reaches zero
     /// </summary>
     public void RemoveItem(int productId, int quantity)
     {
@@ -57,17 +57,17 @@ public class Basket
             throw new ArgumentException("Quantity should be greater than zero.", nameof(quantity));
 
         var item = FindItem(productId);
-        if (item is null) return; // 없으면 아무 것도 안 함
+        if (item is null) return; // Nothing to remove
 
         item.Quantity -= quantity;
 
-        // 수량이 0 이하가 되면 장바구니에서 제거
+        // Remove the item when quantity drops to zero
         if (item.Quantity <= 0)
             Items.Remove(item);
     }
 
     /// <summary>
-    /// 현재 장바구니에서 특정 상품 아이템을 찾기
+    /// Retrieve a basket item by product identifier
     /// </summary>
     private BasketItem? FindItem(int productId)
         => Items.FirstOrDefault(i => i.ProductId == productId);

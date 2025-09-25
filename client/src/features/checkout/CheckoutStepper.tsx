@@ -52,7 +52,7 @@ export default function CheckoutStepper() {
   const [confirmationToken, setConfirmationToken] = useState<ConfirmationToken | null>(null);
   const [createOrder] = useCreateOrderMutation();
 
-  // 리뷰 단계에서 참고용(필요 시 성공 페이지 state로 넘길 수 있음)
+  // Preserve order snapshot for the review/success views if needed
   const [, setOrderForReview] = useState<Order | null>(null);
 
   const handleAddressChange = (e: StripeAddressElementChangeEvent) => {
@@ -63,7 +63,7 @@ export default function CheckoutStepper() {
     setPaymentComplete(!!e?.complete);
   };
 
-  // Stripe AddressElement → API Address 타입
+  // Convert Stripe AddressElement data into the API Address shape
   const getStripeAddress = async (): Promise<Address | null> => {
     const addrEl = elements?.getElement(AddressElement);
     if (!addrEl) return null;
@@ -83,7 +83,7 @@ export default function CheckoutStepper() {
     };
   };
 
-  // CreateOrder payload 생성 (주소 + 카드요약)
+  // Build CreateOrder payload using shipping address and card summary
   const buildCreateOrder = async (token: ConfirmationToken): Promise<CreateOrder> => {
     const shippingAddress = await getStripeAddress();
     const card = token?.payment_method_preview?.card;
@@ -95,7 +95,7 @@ export default function CheckoutStepper() {
     return {
       shippingAddress,
       paymentSummary: {
-        last4: Number(card.last4 ?? 0), // 서버 number, Stripe string → number 변환
+        last4: Number(card.last4 ?? 0), // Server expects a number; Stripe returns a string
         brand: card.brand ?? "",
         expMonth: card.exp_month ?? 0,
         expYear: card.exp_year ?? 0,
@@ -103,32 +103,32 @@ export default function CheckoutStepper() {
     };
   };
 
-  // 결제 확정 (Review 단계에서 실행) — clientSecret + confirmation_token + return_url
+  // Finalize payment during the review step using clientSecret and confirmation token
   const confirmPayment = async () => {
     if (!stripe) throw new Error("Stripe not ready");
     if (!confirmationToken?.id) throw new Error("Missing confirmation token");
     if (!basket?.clientSecret) throw new Error("Missing client secret");
 
-    // clientSecret 경로에서는 elements/redirect 옵션을 넘기지 않습니다(redirect 기본: 'always')
+    // Do not pass elements/redirect options when a clientSecret is supplied (redirect defaults to 'always')
     await stripe.confirmPayment({
-      clientSecret: basket.clientSecret, // 반드시 존재해야 함
+      clientSecret: basket.clientSecret, // Must be present
       confirmParams: {
         confirmation_token: confirmationToken.id,
         return_url: `${window.location.origin}/checkout/success`,
       },
     });
-    // 보통 즉시 return_url로 리다이렉트되므로 아래 코드는 실행되지 않을 수 있습니다.
+    // Stripe usually redirects immediately, so code below may not run
   };
 
   const handleNext = async () => {
     try {
-      // Step 0: 주소 저장 체크 시 업데이트
+      // Step 0: Optionally persist address when the toggle is enabled
       if (activeStep === 0 && saveAsDefault && elements) {
         const addr = await getStripeAddress();
         if (addr) await updateAddress(addr);
       }
 
-      // Step 1: 결제 정보 검증 + ConfirmationToken 생성 + (선제)주문 생성
+      // Step 1: Validate payment details, create confirmation token, pre-create order
       if (activeStep === 1) {
         if (!elements || !stripe) return;
       
@@ -145,12 +145,12 @@ export default function CheckoutStepper() {
         }
         const ct = tokenRes.confirmationToken;
         setConfirmationToken(ct);
-      
-        // 주문 선 생성(Pending)
+
+        // Create a pending order ahead of the actual confirmation
         const payload = await buildCreateOrder(ct);
         const created = await createOrder(payload).unwrap();
-      
-        // ✅ 성공 페이지에서 복구할 수 있도록 임시 저장
+
+        // Cache the order so the success page can recover it
         localStorage.setItem("checkout:pendingOrder", JSON.stringify(created));
       
         setOrderForReview(created);
@@ -158,18 +158,18 @@ export default function CheckoutStepper() {
         return;
       }
       
-      // Step 2: Pay → Stripe가 return_url로 리다이렉트
+      // Step 2: Stripe processes payment and handles the return_url redirect
       if (activeStep === 2) {
         await confirmPayment();
-        return; // 리다이렉트되므로 여기서 끝
+        return; // Redirect occurs, nothing else to do locally
       }
 
-      // 일반적인 다음 단계 이동
+      // Default step progression
       if (activeStep < steps.length - 1) setActiveStep((s) => s + 1);
     } catch (err) {
       const message = err instanceof Error ? err.message : "Something went wrong";
       toast.error(message);
-      // 결제 실패 시 Payment 단계로 되돌리기
+      // If payment failed, return to the payment step
       if (activeStep === 2) setActiveStep(1);
     }
   };
@@ -247,7 +247,7 @@ export default function CheckoutStepper() {
           <Box sx={{ display: activeStep === 2 ? "block" : "none" }}>
             <Typography variant="h6" gutterBottom>Review your order</Typography>
             <Review confirmationToken={confirmationToken} />
-            {/* 필요시 <Review confirmationToken={confirmationToken} order={orderForReview}/> */}
+            {/* Optional: <Review confirmationToken={confirmationToken} order={orderForReview}/> */}
           </Box>
         </Box>
       </Paper>

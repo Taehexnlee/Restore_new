@@ -30,7 +30,7 @@ public class PaymentsController(
         if (intent == null)
             return BadRequest(new ProblemDetails { Title = "Problem creating payment intent" });
 
-        // 최초 생성 시에만 세팅
+        // Set these only on the first creation
         basket.PaymentIntentId ??= intent.Id;
         basket.ClientSecret ??= intent.ClientSecret;
 
@@ -44,29 +44,29 @@ public class PaymentsController(
         return basket.ToDto();
     }
 
-    // POST /api/payments/webhook (Stripe가 호출)
+    // POST /api/payments/webhook — invoked by Stripe
     [AllowAnonymous]
     [HttpPost("webhook")]
     public async Task<IActionResult> StripeWebhook()
     {
-        // 1) Raw body 읽기
+        // 1) Read the raw body
         string json;
         using (var reader = new StreamReader(Request.Body, Encoding.UTF8))
         {
             json = await reader.ReadToEndAsync();
         }
 
-        logger.LogInformation("📩 Stripe Webhook 호출됨. Raw Body: {Body}", json);
+        logger.LogInformation("📩 Stripe webhook received. Raw Body: {Body}", json);
 
         try
         {
-            // 2) Stripe 서명 검증 + Event 구성
+            // 2) Verify Stripe signature and construct the Event
             var stripeEvent = ConstructStripeEvent(json);
 
-            logger.LogInformation("✅ Stripe 이벤트 수신: {Type}, ID: {Id}",
+            logger.LogInformation("✅ Stripe event type {Type}, ID: {Id}",
                 stripeEvent.Type, stripeEvent.Id);
 
-            // 3) 이벤트 타입으로 분기
+            // 3) Branch on event type
             switch (stripeEvent.Type)
             {
                 case "payment_intent.succeeded":
@@ -78,21 +78,21 @@ public class PaymentsController(
                     break;
 
                 default:
-                    logger.LogWarning("⚠️ 처리되지 않은 Stripe 이벤트 타입: {Type}", stripeEvent.Type);
+                    logger.LogWarning("⚠️ Unhandled Stripe event type: {Type}", stripeEvent.Type);
                     break;
             }
 
-            // 4) Stripe에 OK 반환
+            // 4) Return OK to Stripe
             return Ok();
         }
         catch (StripeException sx)
         {
-            logger.LogError(sx, "❌ Stripe webhook StripeException 발생");
+            logger.LogError(sx, "❌ Stripe webhook threw a StripeException");
             return StatusCode(StatusCodes.Status500InternalServerError, "Webhook error");
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "❌ Stripe webhook 예기치 못한 오류 발생");
+            logger.LogError(ex, "❌ Stripe webhook encountered an unexpected error");
             return StatusCode(StatusCodes.Status500InternalServerError, "Unexpected error");
         }
     }
@@ -109,13 +109,13 @@ public class PaymentsController(
         if (string.IsNullOrWhiteSpace(whSecret))
             throw new StripeException("Missing StripeSettings:WebhookSecret");
 
-        // 검증 & 파싱
+        // Verify signature and parse event
         return EventUtility.ConstructEvent(json, signatureHeader, whSecret);
     }
     catch (StripeException sx)
     {
         logger.LogError(sx, "🔒 Stripe signature verification failed.");
-        throw; // 바깥 StripeException 핸들러에서 처리
+        throw; // Outer handler will deal with this
     }
     catch (Exception ex)
     {
@@ -124,7 +124,7 @@ public class PaymentsController(
     }
 }
 
-    // 결제 실패 처리 (주문 없으면 OK로 종료)
+    // Handle failed payments; if no order is found simply return
     private async Task HandlePaymentIntentFailed(PaymentIntent intent)
     {
         var order = await context.Orders
@@ -134,10 +134,10 @@ public class PaymentsController(
         if (order == null)
         {
             logger.LogWarning("PaymentFailed webhook: order not found for intent {IntentId}", intent.Id);
-            return; // 웹훅은 200으로 마무리(상위에서 Ok 반환)
+            return; // Upstream webhook handler still returns 200
         }
 
-        // 재고 롤백
+        // Restore inventory
         foreach (var item in order.OrderItems)
         {
             var product = await context.Products.FindAsync(item.ItemOrdered.ProductId);
@@ -154,7 +154,7 @@ public class PaymentsController(
         logger.LogInformation("Order {OrderId} marked as PaymentFailed, stock rolled back", order.Id);
     }
 
-    // 결제 성공 처리 (주문 없으면 OK로 종료, 금액 불일치 체크)
+    // Handle successful payments and detect mismatched totals
     private async Task HandlePaymentIntentSucceeded(PaymentIntent intent)
     {
         var order = await context.Orders
@@ -164,10 +164,10 @@ public class PaymentsController(
         if (order == null)
         {
             logger.LogWarning("PaymentSucceeded webhook: order not found for intent {IntentId}", intent.Id);
-            return; // 웹훅은 200으로 마무리
+            return; // Upstream webhook handler still returns 200
         }
 
-        // Stripe는 일부 플로우에서 AmountReceived 사용 권장
+        // Prefer AmountReceived when available per Stripe guidance
         var paid = intent.AmountReceived > 0 ? intent.AmountReceived : intent.Amount;
 
         if (order.GetTotal() != paid)
@@ -182,7 +182,7 @@ public class PaymentsController(
             logger.LogInformation("Order {OrderId} marked as PaymentReceived", order.Id);
         }
 
-        // 장바구니 제거
+        // Remove basket tied to this payment intent
         var basket = await context.Baskets.FirstOrDefaultAsync(b => b.PaymentIntentId == intent.Id);
         if (basket != null)
         {

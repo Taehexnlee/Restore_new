@@ -16,7 +16,7 @@ namespace API.DTOs
         public long Discount { get; set; }
         public long Total { get; set; }      // Subtotal + DeliveryFee - Discount
 
-        public string OrderStatus { get; set; } = null!;  // Enum → 문자열
+        public string OrderStatus { get; set; } = null!;  // Serialize enum as string
         public PaymentSummary PaymentSummary { get; set; } = null!;
     }
 }

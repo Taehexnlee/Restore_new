@@ -21,7 +21,7 @@ export default function Review({ confirmationToken }: Props) {
   };
 
   const paymentString = () => {
-    const card = confirmationToken?.payment_method_preview?.card; // <-- 연쇄 ?. 사용
+    const card = confirmationToken?.payment_method_preview?.card; // Uses optional chaining
     if (!card) return "";
     const brand = (card.brand || "").toUpperCase();
     const last4 = card.last4 || "••••";
@@ -47,7 +47,7 @@ export default function Review({ confirmationToken }: Props) {
             component="dd"
             mt={1}
             color="text.secondary"
-            sx={{ whiteSpace: "pre-line" }}  // \n 줄바꿈 표시
+            sx={{ whiteSpace: "pre-line" }}  // Respect embedded newline characters
           >
             {addressString() || "—"}
           </Typography>

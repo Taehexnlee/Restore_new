@@ -13,7 +13,7 @@ public class DbInitializer
         var context          = scope.ServiceProvider.GetRequiredService<StoreContext>();
         var userManager      = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
 
-        await SeedData(context, userManager); // ✅ await 호출
+        await SeedData(context, userManager); // Ensure seeding completes asynchronously
     }
 
     private static async Task SeedData(StoreContext context, UserManager<User> userManager)
@@ -39,10 +39,10 @@ public class DbInitializer
             await userManager.CreateAsync(bob, "Pa$$w0rd");
             await userManager.AddToRoleAsync(bob, "Member");
 
-            // 이미 Products 테이블에 데이터 있으면 시드 안 함
+            // Skip seeding catalog if data already exists
             if (context.Products.Any()) return;
 
-            // 샘플 데이터 넣기
+            // Seed sample data
             var products = new List<Product>
         {
                 new() {

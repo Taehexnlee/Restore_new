@@ -14,11 +14,11 @@ export default function RequireAuth() {
     return (
       <Navigate
         to="/login"
-        state={{ from: location }} // 로그인 후 돌아올 경로 기억
+        state={{ from: location }} // Preserve intended route for redirect after login
         replace
       />
     );
   }
 
-  return <Outlet />; // 인증된 사용자만 children 라우트 접근 허용
+  return <Outlet />; // Only authenticated users may access nested routes
 }

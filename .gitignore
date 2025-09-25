@@ -485,3 +485,7 @@ $RECYCLE.BIN/
 client/.env.production
 API/appsettings.Development.json
 API/appsettings.Development.json
+
+# secrets
+API/appsettings.Development.json
+*.save

@@ -29,7 +29,7 @@ export default function RadioButtonGroup({
       <RadioGroup
         value={selectedValue}
         onChange={onChange}
-        sx={{ my: 0 }} // 라벨과의 간격 최소화 (강의 스타일)
+        sx={{ my: 0 }} // Keep spacing tight between label and radios
       >
         {options.map(({ value, label: text }) => (
           <FormControlLabel

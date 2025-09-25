@@ -3,5 +3,5 @@ public enum OrderStatus
     Pending,
     PaymentReceived,
     PaymentFailed,
-    PaymentMismatch // ✅ 새로 추가
+    PaymentMismatch // Handles mismatched Stripe totals
 }

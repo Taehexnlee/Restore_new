@@ -17,7 +17,7 @@ import { useLoginMutation, useLazyUserInfoQuery } from "./accountsApi";
 export default function LoginForm() {
   const navigate = useNavigate();
   const location = useLocation();
-  // RequireAuth에서 보낸 돌아갈 위치(없으면 null)
+  // Location provided by RequireAuth for post-login redirect (falls back to catalog)
   const from =
     (location.state as { from?: Location } | null)?.from?.pathname ?? "/catalog";
 
@@ -31,15 +31,15 @@ export default function LoginForm() {
   });
 
   const [login, { isLoading }] = useLoginMutation();
-  const [fetchUserInfo] = useLazyUserInfoQuery(); // 로그인 직후 강제 갱신
+  const [fetchUserInfo] = useLazyUserInfoQuery(); // Force a refresh right after login
 
   const onSubmit = async (data: LoginSchema) => {
     try {
-      await login(data).unwrap();       // 쿠키 설정
-      await fetchUserInfo().unwrap();   // ✅ 타이밍 이슈 방지: userInfo를 즉시 갱신
-      navigate(from, { replace: true }); // ✅ 원래 가려던 곳 또는 /catalog
+      await login(data).unwrap();       // Sets authentication cookie
+      await fetchUserInfo().unwrap();   // Immediately refresh user info to avoid timing issues
+      navigate(from, { replace: true }); // Redirect to intended destination or /catalog
     } catch (err) {
-      // 필요 시 토스트/에러 표시
+      // Surface a toast or error message if desired
       console.error(err);
     }
   };

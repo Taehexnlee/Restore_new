@@ -16,8 +16,8 @@ export default function ProductCard({ product }: Props) {
     <Card
       elevation={3}
       sx={{
-        width: '100%',          // ✅ 칸에 맞춰 가로 100%
-        height: '100%',         // ✅ 그리드 아이템 높이에 맞춰 늘림(세로 균등)
+        width: '100%',          // Fill the available column width
+        height: '100%',         // Stretch to match grid item height
         borderRadius: 2,
         display: 'flex',
         flexDirection: 'column',
@@ -26,7 +26,7 @@ export default function ProductCard({ product }: Props) {
     >
       <CardMedia
         sx={{ height: 240, backgroundSize: 'cover' }}
-        image={product.pictureUrl} // 서버 필드명에 맞춰 사용
+        image={product.pictureUrl} // Mirror server field naming
         title={product.name}
       />
       <CardContent>
@@ -38,7 +38,7 @@ export default function ProductCard({ product }: Props) {
         </Typography>
       </CardContent>
 
-      {/* ✅ 버튼 레이아웃 정리 */}
+      {/* Button layout */}
       <CardActions sx={{ px: 2, pb: 2 }}>
         <Box sx={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
           <Button

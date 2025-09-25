@@ -15,7 +15,7 @@ namespace API.Controllers
         private readonly StoreContext _context;
         public OrdersController(StoreContext context) => _context = context;
 
-        // GET /orders (이미 이전 단계에서 구현)
+        // GET /orders — retrieve all orders for the current user
         [HttpGet]
         public async Task<ActionResult<List<OrderDto>>> GetOrders()
         {
@@ -24,13 +24,13 @@ namespace API.Controllers
             var orders = await _context.Orders
                 .Where(o => o.BuyerEmail == email)
                 .OrderByDescending(o => o.OrderDate)
-                .ProjectToDto()                 // ✅ Projection
+                .ProjectToDto()                 // Map entity to DTO on the server
                 .ToListAsync();
 
             return orders;
         }
 
-        // GET /orders/{id} (이미 이전 단계에서 구현)
+        // GET /orders/{id} — retrieve a specific order for the current user
        [HttpGet("{id:int}")]
         public async Task<ActionResult<OrderDto>> GetOrderDetails(int id)
         {
@@ -38,18 +38,18 @@ namespace API.Controllers
 
             var order = await _context.Orders
                 .Where(o => o.BuyerEmail == email && o.Id == id)
-                .ProjectToDto()                 // ✅ Projection
+                .ProjectToDto()                 // Map entity to DTO on the server
                 .FirstOrDefaultAsync();
 
             if (order == null) return NotFound();
             return order;
         }
 
-        // POST /orders  — 주문 생성
+        // POST /orders — create a new order
         [HttpPost]
         public async Task<ActionResult<Order>> CreateOrder(CreateOrderDto orderDto)
         {
-            // 1) 장바구니 로드 (아이템 포함)
+            // 1) Load the basket including items
             var basketId = Request.Cookies["basketId"];
             var basket = await _context.Baskets
                 .Include(b => b.Items)
@@ -60,15 +60,15 @@ namespace API.Controllers
             {
                 return BadRequest(new ProblemDetails { Title = "Basket is empty or not found" });
             }
-            // 2) 장바구니 → 주문 아이템 스냅샷 변환
+            // 2) Convert basket items into order item snapshots
             var items = CreateOrderItems(basket.Items);
             if(items == null)
                 return BadRequest(new ProblemDetails { Title = "One or more items in your basket are no longer available in the desired quantity." });
-            // 3) 소계/배송비 계산 (센트 단위 long)
+            // 3) Compute subtotal and delivery fee (stored in cents)
             long subtotal = items.Sum(i => i.Price * i.Quantity);
             long deliveryFee = CalculateDeliveryFee(subtotal);
 
-            // 4) 주문 엔티티 생성
+            // 4) Construct the order entity
             var order = new Order
             {
                 BuyerEmail     = User.GetUsername(),
@@ -77,17 +77,17 @@ namespace API.Controllers
                 Subtotal       = subtotal,
                 DeliveryFee    = deliveryFee,
                 PaymentSummary = orderDto.PaymentSummary,
-                PaymentIntentId= basket.PaymentIntentId // 장바구니에 저장해 둔 Intent Id
-                // OrderStatus는 기본값(Pending), OrderDate는 UtcNow 초기화
+                PaymentIntentId= basket.PaymentIntentId // Link to the stored payment intent
+                // OrderStatus defaults to Pending; OrderDate defaults to UtcNow
             };
 
             _context.Orders.Add(order);
 
-            // 5) 장바구니 정리 (서버 측 엔티티 & 클라이언트 쿠키)
+            // 5) Clean up basket entity and client cookie
             _context.Baskets.Remove(basket);
             Response.Cookies.Delete("basketId");
 
-            // 6) 저장 & 응답
+            // 6) Persist changes and respond
             var changes = await _context.SaveChangesAsync();
             if (changes <= 0)
             {
@@ -104,7 +104,7 @@ namespace API.Controllers
         }
 
         /// <summary>
-        /// 장바구니 아이템을 주문 아이템(스냅샷)으로 변환
+        /// Convert basket items into order item snapshots
         /// </summary>
         /// </summary>
         private static List<OrderItem>? CreateOrderItems(ICollection<BasketItem> items)
@@ -113,10 +113,10 @@ namespace API.Controllers
 
             foreach (var item in items)
             {
-                // 재고 검증 (상품 정보는 Include 되어 있다고 가정)
+                // Ensure inventory is available (product is already included)
                 if (item.Product.QuantityInStock < item.Quantity)
                 {
-                    // 재고 부족 → 전체 생성 실패 신호
+                    // Insufficient stock aborts the entire order creation
                     return null;
                 }
 
@@ -128,13 +128,13 @@ namespace API.Controllers
                         Name       = item.Product.Name,
                         PictureUrl = item.Product.PictureUrl
                     },
-                    Price    = item.Product.Price,   // cents
+                    Price    = item.Product.Price,   // Price stored in cents
                     Quantity = item.Quantity
                 };
 
                 orderItems.Add(orderItem);
 
-                // 재고 차감
+                // Decrement on-hand inventory
                 item.Product.QuantityInStock -= item.Quantity;
             }
 
@@ -142,7 +142,7 @@ namespace API.Controllers
         }
 
         /// <summary>
-        /// 배송비 계산: $100 이상 무료, 아니면 $5 (센트 기준)
+        /// Calculate delivery fee: orders above $100 ship free, otherwise $5 (in cents)
         /// </summary>
         private static long CalculateDeliveryFee(long subtotal) => subtotal > 10_000 ? 0 : 500;
     }

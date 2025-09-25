@@ -33,12 +33,12 @@ export const basketApi = createApi({
         try {
           patchResult = dispatch(
             basketApi.util.updateQueryData("fetchBasket", undefined, (draft) => {
-              // 캐시에 아직 basket이 없을 수 있음 (없으면 updateQueryData 자체가 throw 될 수 있음)
+              // Cache may not exist yet, causing updateQueryData to throw
               const productId = isBasketItem(product) ? product.productId : product.id;
 
               if (!draft.basketId) {
                 isNewBasket = true;
-                return; // 새로운 바스켓은 응답으로 갱신
+                return; // A fresh basket will arrive with the mutation response
               }
 
               const existing = draft.items.find((i) => i.productId === productId);
@@ -54,7 +54,7 @@ export const basketApi = createApi({
             })
           );
         } catch {
-          // 캐시가 없어서 updateQueryData가 실패한 경우
+          // updateQueryData failed because the cache did not exist
           isNewBasket = true;
         }
 
@@ -87,7 +87,7 @@ export const basketApi = createApi({
             })
           );
         } catch {
-          // 캐시가 아직 없을 수 있음: 낙관적 업데이트 생략
+          // Skip optimistic update if the cache entry is missing
         }
 
         try {
@@ -99,7 +99,7 @@ export const basketApi = createApi({
     }),
 
     clearBasket: builder.mutation<void, void>({
-      // 서버 호출 없이 캐시/쿠키만 정리
+      // Clear cache/cookie without hitting the server
       queryFn: async () => ({ data: undefined }),
       async onQueryStarted(_, { dispatch }) {
         try {
@@ -111,7 +111,7 @@ export const basketApi = createApi({
             })
           );
         } catch {
-          // 캐시 미존재 시 무시
+          // Ignore if the cache entry is absent
         }
         Cookies.remove("basketId");
       },

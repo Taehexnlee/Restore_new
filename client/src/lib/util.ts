@@ -1,7 +1,7 @@
 import type { Order, ShippingAddress, PaymentSummary } from "../app/models/order";
 
 
-/** 통화 포맷: cents → $x,xxx.xx */
+/** Format cents as a USD currency string */
 export const formatCurrency = (cents: number) =>
   (cents / 100).toLocaleString(undefined, {
     style: "currency",
@@ -11,13 +11,13 @@ export const formatCurrency = (cents: number) =>
 // Backwards-compatible alias (if some code uses `currencyFormat`)
 export const currencyFormat = formatCurrency;
 
-/** 주문 타입에서 배송지 뽑아 문자열로 */
+/** Pull the shipping address from an order and format it */
 export function formatAddressFromOrder(order?: Pick<Order, "shippingAddress">) {
   if (!order?.shippingAddress) return "";
   return formatAddress(order.shippingAddress);
 }
 
-/** ShippingAddress → 한 줄 문자열 */
+/** Render a ShippingAddress as a single line */
 export function formatAddress(addr?: ShippingAddress) {
   if (!addr) return "";
   const parts = [
@@ -34,11 +34,11 @@ export function formatAddress(addr?: ShippingAddress) {
   return parts;
 }
 
-/** 주문 타입에서 결제 요약 뽑아 문자열로 */
+/** Pull the payment summary from an order and format it */
 export function formatPaymentFromOrder(order?: Pick<Order, "paymentSummary">) {
   return formatPayment(order?.paymentSummary);
 }
-/** 객체에서 값이 null/undefined/빈 문자열인 속성을 제거 */
+/** Remove keys whose values are null, undefined, or empty strings */
 export function filterEmptyValues<T extends Record<string, unknown>>(obj: T): Partial<T> {
   const result: Partial<T> = {};
   for (const key in obj) {

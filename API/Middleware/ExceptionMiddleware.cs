@@ -20,22 +20,22 @@ public class ExceptionMiddleware : IMiddleware
     {
         try
         {
-            // 다음 미들웨어 실행
+            // Invoke the next middleware in the pipeline
             await next(context);
         }
         catch (Exception ex)
         {
-            // 에러 발생 → 중앙 처리
+            // Handle exceptions in a centralized manner
             await HandleException(context, ex);
         }
     }
 
     private async Task HandleException(HttpContext context, Exception ex)
     {
-        // 로깅
+        // Log the exception details
         _logger.LogError(ex, ex.Message);
 
-        // 응답 세팅
+        // Prepare error response payload
         context.Response.ContentType = "application/json";
         context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
 

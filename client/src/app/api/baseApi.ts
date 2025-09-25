@@ -40,12 +40,12 @@ import { router } from '../routes/Routes';
       switch (originalStatus) {
         case 400: {
           if (typeof responseData === 'string') {
-            // 문자열 본문
+            // Error body returned as plain text
             toast.error(responseData);
           } else if (isRecord(responseData) && 'errors' in responseData) {
             toast.error('Validation error');
           } else if (isRecord(responseData) && typeof responseData.title === 'string') {
-            // ProblemDetails 형태
+            // ASP.NET ProblemDetails payload
             toast.error(responseData.title);
           } else {
             toast.error('Bad request');
@@ -61,7 +61,7 @@ import { router } from '../routes/Routes';
           break;
         }
         case 404: {
-          router.navigate('/not-found');          // ✅ 전용 페이지로 이동
+          router.navigate('/not-found');          // Redirect to dedicated not-found page
           break;
         }
         case 500: {

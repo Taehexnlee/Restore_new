@@ -20,7 +20,7 @@ public class StoreContext : IdentityDbContext<User>
     {
         base.OnModelCreating(builder);
 
-        // ✅ Role 시드 (고정 GUID 사용)
+        // Seed default roles using fixed GUIDs
         builder.Entity<IdentityRole>().HasData(
             new IdentityRole
             {

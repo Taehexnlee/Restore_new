@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace API.Entities.OrderAggregate;
 
-[Owned] // OrderItem 내부에 인라인으로 저장
+[Owned] // Stored inline within OrderItem
 public class ProductItemOrdered
 {
     public int ProductId { get; set; }

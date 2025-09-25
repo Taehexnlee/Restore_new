@@ -4,13 +4,13 @@ export type User = {
     roles: string[];
   };
 
-  // ...기존 User 등 타입들 위/아래 아무데나 추가
+  // Add additional user-related types alongside this declaration
 export type Address = {
   name: string;
   line1: string;
   line2?: string;
   city: string;
   state: string;
-  postal_code: string; // ⬅️ 강의와 동일한 키 이름
+  postal_code: string; // Matches the API contract key name
   country: string;     // ISO 2-letter (e.g. 'US', 'GB')
 };

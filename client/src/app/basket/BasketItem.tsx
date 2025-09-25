@@ -34,7 +34,7 @@ import { currencyFormat } from "../../lib/util";
           position: "relative",
         }}
       >
-        {/* X 버튼 (항목 전체 삭제) */}
+        {/* Remove the entire item */}
         <IconButton
           onClick={() => removeBasketItem({productId: item.productId, quantity: item.quantity})}
           size="small"
@@ -44,7 +44,7 @@ import { currencyFormat } from "../../lib/util";
           <CloseIcon />
         </IconButton>
   
-        {/* 좌측: 이미지 + 상품 정보 */}
+        {/* Left: image and product details */}
         <Box sx={{ display: "flex", alignItems: "center" }}>
           <Box
             component="img"
@@ -61,7 +61,7 @@ import { currencyFormat } from "../../lib/util";
           <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
             <Typography variant="h6">{item.name}</Typography>
   
-            {/* 가격/소계 */}
+            {/* Price and line total */}
             <Box sx={{ display: "flex", alignItems: "center", gap: 3 }}>
               <Typography sx={{ fontSize: "1.1rem" }}>
                 {currencyFormat(item.price)} × {item.quantity}
@@ -73,7 +73,7 @@ import { currencyFormat } from "../../lib/util";
           </Box>
         </Box>
   
-        {/* 우측: 수량 조절 버튼 */}
+        {/* Right: quantity controls */}
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           <IconButton
             onClick={() => removeBasketItem({productId: item.productId, quantity: 1})}

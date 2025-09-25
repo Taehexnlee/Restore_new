@@ -17,7 +17,7 @@ export default function AboutPage() {
 
   const getValidationError = async () => {
     try {
-      await getVal().unwrap();                        // ✅ 이름/사용법 수정
+      await getVal().unwrap();                        // Updated name and usage pattern
     } catch (error) {
       console.log(error);
     }

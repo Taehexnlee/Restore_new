@@ -3,13 +3,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace API.Entities.OrderAggregate;
 
-[Owned] // Order 내부에 인라인으로 저장
+[Owned] // Stored inline within the Order entity
 public class PaymentSummary
 {
-    /// <summary>카드 마지막 4자리</summary>
+    /// <summary>Last four digits of the card</summary>
     public int Last4 { get; set; }
 
-    /// <summary>브랜드 (e.g. VISA, MASTERCARD)</summary>
+    /// <summary>Card brand (e.g. VISA, MASTERCARD)</summary>
     public string Brand { get; set; } = string.Empty;
     [JsonPropertyName("exp_month")]
     public int ExpMonth { get; set; }

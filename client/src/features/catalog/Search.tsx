@@ -15,7 +15,7 @@ export default function Search() {
     setTerm(searchTerm ?? "");
   }, [searchTerm]);
 
-  // ✅ 이벤트가 아닌 '값'을 받도록 디바운스 함수 정의
+  // Create a debounce helper that accepts the raw value instead of the event
   const debouncedSearch = useMemo(
     () =>
       debounce((value: string) => {
@@ -25,7 +25,7 @@ export default function Search() {
   );
 
   useEffect(() => {
-    // 컴포넌트 언마운트시 디바운스 타이머 정리
+    // Clear any pending debounce timers on unmount
     return () => {
       debouncedSearch.clear?.();
     };
@@ -39,9 +39,9 @@ export default function Search() {
       fullWidth
       value={term}
       onChange={(e) => {
-        const value = e.target.value;   // <- 값만 꺼냄
-        setTerm(value);                 // 로컬 입력값 업데이트
-        debouncedSearch(value);         // <- 값만 디바운스로 전달
+        const value = e.target.value;   // Extract the raw value
+        setTerm(value);                 // Update the local input state
+        debouncedSearch(value);         // Trigger the debounced search
       }}
     />
   );

@@ -1,10 +1,10 @@
 // src/features/accounts/accountsApi.ts
 import { createApi } from '@reduxjs/toolkit/query/react';
-import type { User, Address } from '../../app/models/user'; // ⬅️ Address 타입 추가
+import type { User, Address } from '../../app/models/user'; // Include Address type definition
 import type { LoginRequest, RegisterRequest } from '../../app/models/auth';
 import { baseQueryWithErrorHandling } from '../../app/api/baseApi';
 
-// ⬇️ 강의 기준 유틸
+// Toast notifications and router helper
 import { toast } from 'react-toastify';
 import { router } from '../../app/routes/Routes';
 
@@ -13,10 +13,10 @@ export const accountsApi = createApi({
   baseQuery: baseQueryWithErrorHandling,
   tagTypes: ['UserInfo'],
   endpoints: (builder) => ({
-    // 로그인 (쿠키 기반)
+    // Login using cookie-based authentication
     login: builder.mutation<void, LoginRequest>({
       query: (creds) => ({
-        url: '/login?useCookies=true',  // ⬅️ '/api' 제거
+        url: '/login?useCookies=true',  // Base URL already includes /api
         method: 'POST',
         body: creds,
         credentials: 'include',
@@ -24,7 +24,7 @@ export const accountsApi = createApi({
       async onQueryStarted(_, { dispatch, queryFulfilled }) {
         try {
           await queryFulfilled;
-          // ✅ 로그인 성공 후 userInfo 새로고침
+          // Refresh cached user information after a successful login
           dispatch(accountsApi.util.invalidateTags(['UserInfo']));
         } catch {
           /* noop */
@@ -32,7 +32,7 @@ export const accountsApi = createApi({
       },
     }),
 
-    // 회원가입 (커스텀 AccountController)
+    // Register via the AccountController
     register: builder.mutation<void, RegisterRequest>({
       query: (creds) => ({
         url: '/account/register',
@@ -51,7 +51,7 @@ export const accountsApi = createApi({
       },
     }),
 
-    // 현재 로그인 사용자 정보
+    // Fetch details for the signed-in user
     userInfo: builder.query<User, void>({
       query: () => ({
         url: '/account/user-info',
@@ -61,7 +61,7 @@ export const accountsApi = createApi({
       providesTags: ['UserInfo'],
     }),
 
-    // 로그아웃 (서버에서 인증 쿠키 삭제)
+    // Logout (server clears the authentication cookie)
     logout: builder.mutation<void, void>({
       query: () => ({
         url: '/account/logout',
@@ -71,7 +71,7 @@ export const accountsApi = createApi({
       async onQueryStarted(_, { dispatch, queryFulfilled }) {
         try {
           await queryFulfilled;
-          // ✅ userInfo 캐시 무효화 + 홈으로 리다이렉트
+          // Invalidate user cache and return to the home page
           dispatch(accountsApi.util.invalidateTags(['UserInfo']));
           router.navigate('/');
         } catch {
@@ -80,7 +80,7 @@ export const accountsApi = createApi({
       },
     }),
 
-    // ✅ 유저 주소 조회
+    // Fetch the user's stored address
     fetchUserAddress: builder.query<Address, void>({
       query: () => ({
         url: '/account/address',
@@ -89,7 +89,7 @@ export const accountsApi = createApi({
       }),
     }),
 
-    // ✅ 유저 주소 업데이트 (낙관적 업데이트)
+    // Update the user's address with an optimistic cache update
     updateUserAddress: builder.mutation<Address, Address>({
       query: (address) => ({
         url: '/account/address',
@@ -98,7 +98,7 @@ export const accountsApi = createApi({
         credentials: 'include',
       }),
       async onQueryStarted(address, { dispatch, queryFulfilled }) {
-        // 낙관적 캐시 패치
+        // Apply optimistic cache patch
         const patch = dispatch(
           accountsApi.util.updateQueryData('fetchUserAddress', undefined, (draft) => {
             Object.assign(draft as Address, address);
@@ -107,7 +107,7 @@ export const accountsApi = createApi({
         try {
           await queryFulfilled;
         } catch {
-          patch.undo(); // 실패 롤백
+          patch.undo(); // Roll back on failure
         }
       },
     }),
@@ -119,7 +119,7 @@ export const {
   useRegisterMutation,
   useUserInfoQuery,
   useLogoutMutation,
-  useLazyUserInfoQuery,      // ⬅️ 강의에서 로그인 직후 강제 조회용
-  useFetchUserAddressQuery,  // ⬅️ 주소 조회
-  useUpdateUserAddressMutation, // ⬅️ 주소 수정
+  useLazyUserInfoQuery,      // Lazy variant for manual refresh after login
+  useFetchUserAddressQuery,  // Hook for address retrieval
+  useUpdateUserAddressMutation, // Hook for address updates
 } = accountsApi;

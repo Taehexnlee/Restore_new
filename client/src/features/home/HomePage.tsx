@@ -6,14 +6,14 @@ export default function HomePage() {
     <Box
       sx={{
         maxWidth: "xl",
-        mx: "auto",                // 가운데 정렬
-        px: 4,                     // 좌우 여백
-        position: "relative",      // 안쪽 절대 포지션 기준
+        mx: "auto",                // Center horizontally
+        px: 4,                     // Apply horizontal padding
+        position: "relative",      // Provide positioning context for overlay elements
         mt: { xs: 4, md: 8 },
         height: { xs: 420, sm: 520, md: 640 },
       }}
     >
-      {/* 배경 이미지 */}
+      {/* Background image */}
       <Box
         component="img"
         src="/images/hero1.jpg"
@@ -29,7 +29,7 @@ export default function HomePage() {
         }}
       />
 
-      {/* 오버레이 컨텐츠 */}
+      {/* Overlay content */}
       <Box
         sx={{
           position: "relative",

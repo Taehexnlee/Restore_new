@@ -9,7 +9,7 @@ export function useBasket() {
   const subtotal =
     basket?.items?.reduce((sum, i) => sum + i.price * i.quantity, 0) ?? 0;
 
-  // $100(=10000cents) 이상 무료배송, 아니면 $5(=500 cents)
+  // Orders above $100 (10,000 cents) ship free; otherwise charge $5 (500 cents)
   const deliveryFee = subtotal > 10000 ? 0 : 500;
 
   const total = subtotal + deliveryFee;

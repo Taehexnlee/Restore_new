@@ -15,7 +15,7 @@ export default function CheckoutPage() {
   const { data: basket } = useFetchBasketQuery();
   const [createPaymentIntent, { isLoading }] = useCreatePaymentIntentMutation();
   const created = useRef(false);
-  const darkMode = useAppSelector((state) => state.ui.darkMode); // ✅ 다크모드 가져오기
+  const darkMode = useAppSelector((state) => state.ui.darkMode); // Read dark mode preference
 
   useEffect(() => {
     if (!created.current) {
@@ -30,7 +30,7 @@ export default function CheckoutPage() {
       clientSecret: basket.clientSecret,
       appearance: {
         labels: "floating",
-        theme: darkMode ? "night" : "stripe", // ✅ Stripe 테마 적용 (typesafe)
+        theme: darkMode ? "night" : "stripe", // Match the Stripe theme to dark mode
       },
     };
   }, [basket?.clientSecret, darkMode]);
@@ -46,16 +46,16 @@ export default function CheckoutPage() {
   return (
     <Container maxWidth="lg" sx={{ mt: 10 }}>
       <Grid container spacing={6}>
-        {/* 좌측 CheckoutStepper */}
+        {/* Checkout stepper */}
         <Grid item xs={12} md={8}>
           <Elements stripe={stripePromise} options={options}>
             <CheckoutStepper />
           </Elements>
         </Grid>
 
-        {/* 우측 주문 요약 */}
+        {/* Order summary */}
         <Grid item xs={12} md={4}>
-          <OrderSummary />  {/* ✅ 다시 추가 */}
+          <OrderSummary />  {/* Display order summary */}
         </Grid>
       </Grid>
     </Container>

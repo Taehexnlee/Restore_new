@@ -7,36 +7,36 @@ public class Order
 {
     public int Id { get; set; }
 
-    /// <summary>구매자 식별(이메일 등)</summary>
+    /// <summary>Identifier for the buyer (email)</summary>
     public string BuyerEmail { get; set; } = string.Empty;
 
-    /// <summary>배송지 (Owned, Orders 테이블에 인라인 컬럼)</summary>
+    /// <summary>Shipping address stored inline on the Orders table</summary>
     public ShippingAddress ShippingAddress { get; set; } = new();
 
-    /// <summary>주문 생성 시간(UTC)</summary>
+    /// <summary>UTC timestamp when the order was created</summary>
     public DateTime OrderDate { get; set; } = DateTime.UtcNow;
 
-    /// <summary>주문 상품들</summary>
+    /// <summary>Collection of items included in the order</summary>
     public List<OrderItem> OrderItems { get; set; } = new();
 
-    /// <summary>소계(센트 단위)</summary>
+    /// <summary>Subtotal stored in cents</summary>
     public long Subtotal { get; set; }
 
-    /// <summary>배송비(센트 단위)</summary>
+    /// <summary>Delivery fee stored in cents</summary>
     public long DeliveryFee { get; set; }
 
-    /// <summary>할인(센트 단위) — 추후 쿠폰 등 확장 대비</summary>
+    /// <summary>Discount amount in cents (extensible for coupons)</summary>
     public long Discount { get; set; }
 
-    /// <summary>Stripe PaymentIntent Id — 방어적으로 optional</summary>
+    /// <summary>Associated Stripe PaymentIntent identifier (optional)</summary>
     public string? PaymentIntentId { get; set; }
 
-    /// <summary>주문 상태</summary>
+    /// <summary>Status of the order</summary>
     public OrderStatus OrderStatus { get; set; } = OrderStatus.Pending;
 
-    /// <summary>결제 요약(브랜드/만료/마지막4자리) — Owned</summary>
+    /// <summary>Snapshot of payment details (brand/expiry/last four)</summary>
     public PaymentSummary PaymentSummary { get; set; } = new();
 
-    /// <summary>총액(센트): 소계 + 배송비 - 할인</summary>
+    /// <summary>Total amount in cents (subtotal + delivery - discount)</summary>
     public long GetTotal() => Subtotal + DeliveryFee - Discount;
 }

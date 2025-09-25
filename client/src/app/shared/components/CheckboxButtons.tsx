@@ -3,20 +3,20 @@ import { FormGroup, FormControlLabel, Checkbox } from "@mui/material";
 import { useEffect, useState } from "react";
 
 type Props = {
-  items: string[];                // 표시할 항목 목록 (예: brands, types)
-  checked: string[];              // 현재 체크된 값들
-  onChange: (items: string[]) => void; // 변경 시 부모로 올려줄 콜백
+  items: string[];                // Items to render (e.g., brands, types)
+  checked: string[];              // Values currently selected
+  onChange: (items: string[]) => void; // Notify parent of selection changes
 };
 
 export default function CheckboxButtons({ items, checked, onChange }: Props) {
-  // 로컬 체크 상태 (부모값과 동기화)
+  // Local selection state synchronized with the parent value
   const [checkedItems, setCheckedItems] = useState<string[]>(checked);
 
   useEffect(() => {
     setCheckedItems(checked);
   }, [checked]);
 
-  // 토글 핸들러: 이미 있으면 제거, 없으면 추가
+  // Toggle handler: remove if already selected, otherwise add
   const handleToggle = (value: string) => {
     const updatedChecked =
       checkedItems.includes(value)
@@ -24,7 +24,7 @@ export default function CheckboxButtons({ items, checked, onChange }: Props) {
         : [...checkedItems, value];
 
     setCheckedItems(updatedChecked);
-    onChange(updatedChecked); // 부모에 변경 사항 전달 (=> Redux dispatch 등)
+    onChange(updatedChecked); // Propagate changes upward (e.g., Redux dispatch)
   };
 
   return (

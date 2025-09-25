@@ -5,5 +5,5 @@ export const loginSchema = z.object({
   password: z.string().min(6, { message: "Password must be at least 6 characters" }),
 });
 
-// ✅ 스키마에서 TS 타입 자동 생성
+// Auto-generate TypeScript types from the schema
 export type LoginSchema = z.infer<typeof loginSchema>;

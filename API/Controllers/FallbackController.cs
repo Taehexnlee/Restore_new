@@ -9,7 +9,7 @@ namespace API.Controllers
     {
         public IActionResult Index()
         {
-            // wwwroot/index.html 물리 파일을 그대로 반환
+            // Serve the wwwroot/index.html file directly
             return PhysicalFile(
                 Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "index.html"),
                 "text/html"

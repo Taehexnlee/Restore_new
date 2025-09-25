@@ -8,7 +8,7 @@ services:
       - "1433:1433"
     volumes:
       - sql_data:/var/opt/mssql
-    # ⬇︎ ARM/Mac이면 필요 (Windows/Intel은 생략)
+    # Force the AMD64 image on Apple Silicon hosts; omit on native x64
     platform: "linux/amd64"
 
 volumes:

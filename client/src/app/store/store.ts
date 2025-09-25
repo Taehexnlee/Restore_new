@@ -13,7 +13,7 @@ import { ordersApi } from "../../features/orders/ordersApi";
 export const store = configureStore({
   reducer: {
     counter: counterReducer,
-    ui: uiReducer, // ✅ 추가
+    ui: uiReducer, // UI theme and loading state
     catalog : catalogSlice.reducer,
     [catalogApi.reducerPath]: catalogApi.reducer,
     [errorApi.reducerPath]: errorApi.reducer,

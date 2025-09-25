@@ -5,7 +5,7 @@ namespace API.Entities
 {
     public class User : IdentityUser
     {
-        // 선택 저장이므로 둘 다 nullable
+        // Address is optional, so both fields remain nullable
         public int? AddressId { get; set; }
         public Address? Address { get; set; }
     }

@@ -12,7 +12,7 @@ const sortOptions = [
   { value: "price",     label: "Price: Low to High" },
 ];
 
-// 상위에서 내려주는 필터 데이터 타입
+// Filter data injected from the parent component
 type FiltersData = { brands: string[]; types: string[] };
 type Props = { filtersData: FiltersData };
 
@@ -22,12 +22,12 @@ export default function Filters({ filtersData }: Props) {
 
   return (
     <Box display="flex" flexDirection="column" gap={3}>
-      {/* 검색 */}
+      {/* Search */}
       <Paper sx={{ p: 3, borderRadius: 2 }}>
         <Search />
       </Paper>
 
-      {/* 정렬 */}
+      {/* Sorting */}
       <Paper sx={{ p: 3, borderRadius: 2 }}>
         <RadioButtonGroup
           label="Sort by"
@@ -37,7 +37,7 @@ export default function Filters({ filtersData }: Props) {
         />
       </Paper>
 
-      {/* 브랜드 필터 */}
+      {/* Brand filter */}
       <Paper sx={{ p: 3, borderRadius: 2 }}>
         <Typography variant="subtitle1" sx={{ mb: 1 }}>Brands</Typography>
         <CheckboxButtons
@@ -47,7 +47,7 @@ export default function Filters({ filtersData }: Props) {
         />
       </Paper>
 
-      {/* 타입 필터 */}
+      {/* Type filter */}
       <Paper sx={{ p: 3, borderRadius: 2 }}>
         <Typography variant="subtitle1" sx={{ mb: 1 }}>Types</Typography>
         <CheckboxButtons
@@ -57,7 +57,7 @@ export default function Filters({ filtersData }: Props) {
         />
       </Paper>
 
-      {/* 리셋 */}
+      {/* Reset button */}
       <Button variant="outlined" color="inherit" onClick={() => dispatch(resetParams())}>
         Reset filters
       </Button>

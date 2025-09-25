@@ -1,6 +1,6 @@
 // src/app/models/productParams.ts
 export type ProductParams = {
-    orderBy: string;           // "name" | "price" | "priceDesc" 등
+    orderBy: string;           // e.g. "name", "price", "priceDesc"
     searchTerm: string;
     types: string[];
     brands: string[];

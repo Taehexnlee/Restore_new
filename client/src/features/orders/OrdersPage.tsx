@@ -16,7 +16,7 @@ import {
   import { format, isValid, parseISO } from "date-fns";
   import type { FetchBaseQueryError } from "@reduxjs/toolkit/query";
 import type { SerializedError } from "@reduxjs/toolkit";
-import { currencyFormat } from "../../lib/util"; // ✅ 공용 util 사용
+import { currencyFormat } from "../../lib/util"; // Shared currency helper
 
   const isRecord = (val: unknown): val is Record<string, unknown> =>
     typeof val === "object" && val !== null;

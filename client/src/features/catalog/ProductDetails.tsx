@@ -29,15 +29,15 @@ export default function ProductDetails() {
   const [addBasketItem] = useAddBasketItemMutation();
   const [removeBasketItem] = useRemoveBasketItemMutation();
 
-  // 현재 장바구니에 동일 상품 있으면 찾아오기
+  // Locate the matching item in the current basket
   const item: Item | undefined = basket?.items.find(
     (i) => i.productId === productId
   );
 
-  // 수량: controlled input
+  // Manage product quantity via a controlled input
   const [quantity, setQuantity] = useState<number>(0);
 
-  // 상품이 장바구니에 있으면 초기 수량 동기화, 없으면 0
+  // Synchronize the field with basket quantity, defaulting to zero
   useEffect(() => {
     setQuantity(item ? item.quantity : 0);
   }, [item]);
@@ -52,31 +52,31 @@ export default function ProductDetails() {
     { label: "Quantity in stock", value: product.quantityInStock },
   ];
 
-  // 입력 변경(음수 방지)
+  // Handle manual input changes while preventing negative values
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = +e.currentTarget.value;
     if (val >= 0) setQuantity(val);
   };
 
-  // 장바구니 업데이트(증가/감소/삭제)
+  // Apply basket updates (add, increase, or decrease)
   const handleUpdateBasket = async () => {
     if (!product) return;
 
-    // 변경량(절댓값): 장바구니에 없음 => quantity, 있으면 |quantity - item.quantity|
+    // Absolute difference: new desired quantity minus current basket quantity
     const diff = Math.abs(item ? quantity - item.quantity : quantity);
 
     if (diff === 0) return;
 
     if (!item || quantity > item.quantity) {
-      // 새로 담거나 수량 증가
+      // Add an item or increase its quantity
       await addBasketItem({ product: item ?? product, quantity: diff });
     } else {
-      // 수량 감소/삭제
+      // Decrease quantity or remove the item
       await removeBasketItem({ productId: product.id, quantity: diff });
     }
   };
 
-  // 버튼 라벨/비활성화 조건
+  // Determine button label and disabled state
   const noChange = (item && quantity === item.quantity) || (!item && quantity === 0);
   const buttonLabel = item ? "Update Quantity" : "Add to basket";
 
@@ -118,7 +118,7 @@ export default function ProductDetails() {
               type="number"
               label="Quantity in basket"
               fullWidth
-              value={quantity}            // ← controlled
+              value={quantity}            // Controlled input value
               onChange={handleInputChange}
               inputProps={{ min: 0 }}
             />

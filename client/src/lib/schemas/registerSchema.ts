@@ -1,7 +1,7 @@
 // src/lib/schemas/registerSchema.ts
 import { z } from "zod";
 
-// MS 복잡도 규칙과 유사(소문자/대문자/숫자/특수문자 포함, 길이 6~10)
+// Mirror Microsoft-style complexity requirements (lower/upper/digit/symbol, length 6-10)
 const passwordValidation = new RegExp(
   /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9]).{6,10}$/
 );

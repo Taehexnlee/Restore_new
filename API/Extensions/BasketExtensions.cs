@@ -6,12 +6,12 @@ namespace API.Extensions;
 
 public static class BasketExtensions
 {
-    // Basket 엔티티를 BasketDto로 변환
+    // Convert a Basket entity into a BasketDto
     public static BasketDto ToDto(this Basket basket)
     {
         return new BasketDto
         {
-            Id = basket.Id,               // 필요 없다면 DTO에서 제거해도 됨
+            Id = basket.Id,               // Retain for parity; remove if unused
             BasketId = basket.BasketId,
             ClientSecret = basket.ClientSecret,
             PaymentIntentId = basket.PaymentIntentId,

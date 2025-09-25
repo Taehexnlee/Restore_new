@@ -5,8 +5,8 @@ import type { ProductParams } from "../../app/models/productParams";
 const initialState: ProductParams = {
   pageNumber: 1,
   pageSize: 8,
-  types: [],      // 빈 배열
-  brands: [],     // 빈 배열
+  types: [],      // Empty array
+  brands: [],     // Empty array
   searchTerm: '',
   orderBy: 'name'
 };

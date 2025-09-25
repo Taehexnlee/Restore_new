@@ -114,7 +114,7 @@ import { formatAddressFromOrder, formatPaymentFromOrder, currencyFormat } from "
   
           <Divider sx={{ my: 2 }} />
   
-          {/* 아이템 테이블 */}
+          {/* Item table */}
           <Table size="small">
             <TableHead>
               <TableRow>
@@ -138,7 +138,7 @@ import { formatAddressFromOrder, formatPaymentFromOrder, currencyFormat } from "
             </TableBody>
           </Table>
   
-          {/* 금액 요약 */}
+          {/* Totals */}
           <Box sx={{ mt: 2 }}>
             <Box
               component="dl"

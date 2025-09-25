@@ -2,11 +2,11 @@ import { createSlice } from '@reduxjs/toolkit';
 
 const LS_KEY = 'darkMode';
 
-// 로컬스토리지에서 초기값 읽기
+// Read the initial value from localStorage
 function getInitialDarkMode(): boolean {
   try {
     const raw = localStorage.getItem(LS_KEY);
-    return raw ? JSON.parse(raw) : true; // 기본값: 다크모드 on
+    return raw ? JSON.parse(raw) : true; // Default to dark mode enabled
   } catch {
     return true;
   }
@@ -36,7 +36,7 @@ const uiSlice = createSlice({
       state.darkMode = !state.darkMode;
       localStorage.setItem(LS_KEY, JSON.stringify(state.darkMode));
     },
-    // 필요하면 직접 세팅도 가능
+    // Allow explicitly setting the mode when needed
     setDarkMode: (state, action: { payload: boolean }) => {
       state.darkMode = action.payload;
       localStorage.setItem(LS_KEY, JSON.stringify(state.darkMode));

@@ -5,7 +5,7 @@ namespace API.Entities
 {
     public class Address
     {
-        [JsonIgnore]                // 응답 JSON에는 ID 숨김
+        [JsonIgnore]                // Hide ID in serialized responses
         public int Id { get; set; }
 
         public required string Name { get; set; }
@@ -14,7 +14,7 @@ namespace API.Entities
         public required string City { get; set; }
         public required string State { get; set; }
 
-        // Stripe 포맷과 맞추기: postal_code
+        // Align with Stripe field naming: postal_code
         [JsonPropertyName("postal_code")]
         public required string PostalCode { get; set; }
 

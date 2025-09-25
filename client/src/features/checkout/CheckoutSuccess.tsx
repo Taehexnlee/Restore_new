@@ -11,7 +11,7 @@ export default function CheckoutSuccess() {
   const { clearBasket } = useBasket();
 
   useEffect(() => {
-    // 1) 로컬 캐시에서 주문 복구
+    // 1) Restore order from local cache
     const cached = localStorage.getItem("checkout:pendingOrder");
     if (cached) {
       try {
@@ -20,9 +20,9 @@ export default function CheckoutSuccess() {
         setOrder(null);
       }
     }
-    // 2) 장바구니 정리
+    // 2) Clear the basket
     clearBasket().catch(() => {});
-    // 3) 캐시 제거
+    // 3) Remove cached payload
     localStorage.removeItem("checkout:pendingOrder");
   }, [clearBasket]);
 

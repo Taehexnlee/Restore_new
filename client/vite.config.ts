@@ -6,9 +6,9 @@ import mkcert from 'vite-plugin-mkcert'
 export default defineConfig({
   plugins: [react(), mkcert()],
   build: {
-    outDir: "../API/wwwroot",          // ← 빌드 산출물 API로!
-    emptyOutDir: true,                  // 빌드 시 출력 폴더 비우기
-    chunkSizeWarningLimit: 1024,        // 경고 임계값(1MB) 상향
+    outDir: "../API/wwwroot",          // Emit the client bundle into the backend's static folder
+    emptyOutDir: true,                  // Clear the output directory before building
+    chunkSizeWarningLimit: 1024,        // Raise the warning threshold to 1MB
   },
   server: {
     port: 3000,

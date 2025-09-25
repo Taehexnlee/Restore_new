@@ -15,7 +15,7 @@ export default function BasketPage() {
     </Container>;
   }
 
-  // 요약 정보는 OrderSummary 내부의 useBasket 훅에서 계산
+  // Totals are computed inside OrderSummary via the useBasket hook
 
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 6 }}>
@@ -23,7 +23,7 @@ export default function BasketPage() {
         Your Basket
       </Typography>
 
-      {/* 메인 영역: 좌(아이템 리스트) / 우(주문 요약) */}
+      {/* Layout: items on the left, summary on the right */}
       <Box
         sx={{
           display: "flex",
@@ -32,14 +32,14 @@ export default function BasketPage() {
           alignItems: { xs: "stretch", md: "flex-start" },
         }}
       >
-        {/* 왼쪽: 장바구니 아이템들 */}
+        {/* Left: basket items */}
         <Box sx={{ flex: 1, display: "flex", flexDirection: "column", gap: 2 }}>
           {basket.items.map((item) => (
             <BasketItem key={item.productId} item={item} />
           ))}
         </Box>
 
-        {/* 오른쪽: 주문 요약 (OrderSummary 자체가 Paper 포함) */}
+        {/* Right: order summary (OrderSummary already renders a Paper) */}
         <Box sx={{ width: { xs: "100%", md: 380 } }}>
           <OrderSummary />
         </Box>
